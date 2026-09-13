@@ -17,6 +17,13 @@ export type RatingStats = {
   distribution: [number, number, number, number, number];
 };
 
+export type GameSort = "popular" | "rating" | "newest";
+
+export type GameListItem = {
+  game: Game;
+  stats: RatingStats;
+};
+
 export type Review = {
   id: string;
   gameId: string;
