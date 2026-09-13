@@ -2,7 +2,7 @@ import { HeartRating } from "@/components/heart-rating";
 import type { Review } from "@/lib/types";
 
 const rankColors = ["text-accent", "text-p2", "text-p1"];
-const columns = "md:grid md:grid-cols-[90px_200px_140px_90px_minmax(0,1fr)] md:gap-4";
+const columns = "md:grid md:grid-cols-[90px_220px_120px_140px_minmax(0,1fr)] md:gap-4";
 
 function ordinal(rank: number) {
   const suffixes = ["th", "st", "nd", "rd"];
@@ -13,9 +13,12 @@ function ordinal(rank: number) {
 export function ReviewTable({ reviews }: { reviews: Review[] }) {
   return (
     <section aria-labelledby="reviews-heading" className="mt-14">
-      <h2 id="reviews-heading" className="sr-only">
-        Top reviews
-      </h2>
+      <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="reviews-heading" className="font-pixel text-xl">
+          Top reviews
+        </h2>
+        <span className="text-sm text-muted uppercase">Ranked by likes</span>
+      </div>
       <div
         aria-hidden="true"
         className={`hidden border-b-2 border-dashed border-line pb-2.5 font-pixel text-sm text-muted ${columns}`}
@@ -23,7 +26,7 @@ export function ReviewTable({ reviews }: { reviews: Review[] }) {
         <span>Rank</span>
         <span>Player</span>
         <span>Score</span>
-        <span>Time</span>
+        <span>Rating</span>
         <span>Review</span>
       </div>
 
@@ -39,15 +42,23 @@ export function ReviewTable({ reviews }: { reviews: Review[] }) {
                 className={`flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b-2 border-dashed border-line py-4 md:items-start ${columns}`}
               >
                 <span className={`font-pixel text-xl ${color}`}>{ordinal(index + 1)}</span>
-                <span className={`truncate font-pixel text-[17px] uppercase ${color}`}>
-                  {review.author.username}
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className={`truncate font-pixel text-[17px] uppercase ${color}`}>
+                    {review.author.username}
+                  </span>
+                  <span className="text-sm text-muted">
+                    {review.platform}
+                    {review.hoursPlayed !== null && ` · ${review.hoursPlayed}h`}
+                  </span>
+                </span>
+                <span className="flex items-baseline gap-1.5">
+                  <span className={`font-pixel text-lg ${color}`}>
+                    {review.likes.toLocaleString("en-US")}
+                  </span>
+                  <span className="text-xs text-muted uppercase">likes</span>
                 </span>
                 <span className="md:pt-1">
                   <HeartRating value={review.rating} />
-                </span>
-                <span className="flex gap-2 text-sm text-ink-soft md:flex-col md:gap-0.5">
-                  <span>{review.hoursPlayed === null ? "--" : `${review.hoursPlayed}h`}</span>
-                  <span className="text-muted">{review.platform}</span>
                 </span>
                 <p className="basis-full text-[15px] leading-relaxed text-pretty">{review.body}</p>
               </li>
