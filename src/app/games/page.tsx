@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GameCard } from "@/components/game-card";
+import { TabLink } from "@/components/tab-link";
 import { listGames, listGenres } from "@/lib/games";
 import type { GameSort } from "@/lib/types";
 
@@ -46,22 +47,16 @@ export default async function GamesPage(props: PageProps<"/games">) {
       </div>
 
       <div className="mt-8 flex flex-col gap-4 border-y-2 border-dashed border-line py-4">
-        <nav aria-label="Sort games" className="flex flex-wrap gap-2 text-sm font-semibold uppercase">
-          {sortOptions.map((option) => {
-            const active = option.value === sort;
-            return (
-              <Link
-                key={option.value}
-                href={gamesHref(option.value, genre)}
-                aria-current={active ? "page" : undefined}
-                className={`flex h-10 items-center border-2 px-3.5 ${
-                  active ? "border-accent bg-accent text-screen" : "border-ink hover:border-accent hover:text-accent"
-                }`}
-              >
-                {option.label}
-              </Link>
-            );
-          })}
+        <nav aria-label="Sort games" className="flex flex-wrap gap-2">
+          {sortOptions.map((option) => (
+            <TabLink
+              key={option.value}
+              href={gamesHref(option.value, genre)}
+              active={option.value === sort}
+            >
+              {option.label}
+            </TabLink>
+          ))}
         </nav>
         <nav aria-label="Filter by genre" className="flex flex-wrap gap-x-5 gap-y-2 text-sm uppercase">
           {[undefined, ...genres].map((item) => {
