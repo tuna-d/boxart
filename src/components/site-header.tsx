@@ -34,7 +34,7 @@ export function SiteHeader() {
             name="q"
             type="search"
             placeholder="_"
-            className="w-44 bg-transparent text-ink outline-none placeholder:text-muted"
+            className="w-44 bg-transparent text-ink placeholder:text-muted"
           />
         </form>
 
