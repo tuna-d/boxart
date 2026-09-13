@@ -1,6 +1,7 @@
 const HEART_PATH = "M1 0h2v1H1zM4 0h2v1H4zM0 1h7v2H0zM1 3h5v1H1zM2 4h3v1H2zM3 5h1v1H3z";
 
 const sizes = {
+  xs: "h-3 w-3.5",
   sm: "h-4 w-[18px]",
   lg: "h-[21px] w-6",
 };

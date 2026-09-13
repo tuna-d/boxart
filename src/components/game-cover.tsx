@@ -1,6 +1,10 @@
 import { toneFor } from "@/lib/tone";
 
 const sizes = {
+  xs: {
+    frame: "shadow-[0_-3px_0_var(--color-ink),0_3px_0_var(--color-ink),-3px_0_0_var(--color-ink),3px_0_0_var(--color-ink)]",
+    title: "hidden",
+  },
   sm: {
     frame: "shadow-[0_-4px_0_var(--color-ink),0_4px_0_var(--color-ink),-4px_0_0_var(--color-ink),4px_0_0_var(--color-ink)]",
     title: "right-3 bottom-3 left-3 text-sm",
