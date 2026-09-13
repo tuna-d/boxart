@@ -45,10 +45,14 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-4 font-pixel text-sm whitespace-nowrap uppercase md:gap-6 md:text-[15px] lg:ml-0">
           {player ? (
             <>
-              <span className="max-w-[40vw] truncate text-accent">
+              <Link
+                href="/settings"
+                title="Settings"
+                className="max-w-[40vw] truncate text-accent hover:text-ink"
+              >
                 <span className="hidden sm:inline">1P </span>
-                {player.username ?? "Player"}
-              </span>
+                {player.needsUsername ? "Enter name" : (player.username ?? "Player")}
+              </Link>
               <form action={signOut}>
                 <button type="submit" className="uppercase text-p2 hover:text-ink">
                   Sign out
