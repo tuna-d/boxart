@@ -1,4 +1,4 @@
-import type { Game, RatingStats, Review } from "./types";
+import type { Game, LibraryEntry, Player, RatingStats, Review } from "./types";
 
 export const sampleGames: Game[] = [
   {
@@ -229,4 +229,53 @@ export const sampleReviews: Review[] = [
     likes: 312,
     createdAt: "2026-04-03",
   },
+];
+
+export const samplePlayers: Player[] = [
+  {
+    username: "mara_plays",
+    bio: "Mostly indies, always with a notebook. Will replay anything with a good map.",
+    joinedAt: "2025-02-11",
+  },
+  {
+    username: "okan.dev",
+    bio: "Plays on the train, reviews on the way back.",
+    joinedAt: "2025-06-03",
+  },
+  {
+    username: "quietlobby",
+    bio: "Puzzle games and long silences.",
+    joinedAt: "2025-11-20",
+  },
+  {
+    username: "deniz_k",
+    bio: "Honest scores, no hype.",
+    joinedAt: "2026-01-08",
+  },
+];
+
+export const sampleLibrary: LibraryEntry[] = [
+  { username: "mara_plays", gameId: "outer-wilds", status: "played", rating: 5, updatedAt: "2026-03-02" },
+  { username: "mara_plays", gameId: "hollow-knight", status: "played", rating: 5, updatedAt: "2026-01-14" },
+  { username: "mara_plays", gameId: "hades", status: "played", rating: 4.5, updatedAt: "2026-04-22" },
+  { username: "mara_plays", gameId: "portal-2", status: "played", rating: 5, updatedAt: "2025-09-30" },
+  { username: "mara_plays", gameId: "disco-elysium", status: "played", rating: 4, updatedAt: "2025-12-05" },
+  { username: "mara_plays", gameId: "celeste", status: "played", rating: 4, updatedAt: "2025-08-17" },
+  { username: "mara_plays", gameId: "elden-ring", status: "playing", rating: null, updatedAt: "2026-08-30" },
+  { username: "mara_plays", gameId: "tunic", status: "backlog", rating: null, updatedAt: "2026-07-12" },
+  { username: "mara_plays", gameId: "return-of-the-obra-dinn", status: "backlog", rating: null, updatedAt: "2026-06-01" },
+  { username: "mara_plays", gameId: "balatro", status: "backlog", rating: null, updatedAt: "2026-05-15" },
+  { username: "okan.dev", gameId: "outer-wilds", status: "played", rating: 4, updatedAt: "2026-05-19" },
+  { username: "okan.dev", gameId: "celeste", status: "played", rating: 4.5, updatedAt: "2026-04-03" },
+  { username: "okan.dev", gameId: "stardew-valley", status: "played", rating: 3.5, updatedAt: "2025-10-11" },
+  { username: "okan.dev", gameId: "inscryption", status: "played", rating: 4, updatedAt: "2026-02-27" },
+  { username: "okan.dev", gameId: "balatro", status: "playing", rating: null, updatedAt: "2026-09-01" },
+  { username: "okan.dev", gameId: "hades", status: "backlog", rating: null, updatedAt: "2026-06-18" },
+  { username: "okan.dev", gameId: "disco-elysium", status: "backlog", rating: null, updatedAt: "2026-03-09" },
+  { username: "quietlobby", gameId: "outer-wilds", status: "played", rating: 4.5, updatedAt: "2026-07-08" },
+  { username: "quietlobby", gameId: "return-of-the-obra-dinn", status: "played", rating: 5, updatedAt: "2026-02-14" },
+  { username: "quietlobby", gameId: "tunic", status: "playing", rating: null, updatedAt: "2026-08-25" },
+  { username: "deniz_k", gameId: "outer-wilds", status: "played", rating: 3, updatedAt: "2026-08-21" },
+  { username: "deniz_k", gameId: "elden-ring", status: "played", rating: 4, updatedAt: "2026-05-02" },
+  { username: "deniz_k", gameId: "celeste", status: "backlog", rating: null, updatedAt: "2026-07-30" },
 ];

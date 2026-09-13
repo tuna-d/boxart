@@ -24,6 +24,33 @@ export type GameListItem = {
   stats: RatingStats;
 };
 
+export type Player = {
+  username: string;
+  bio: string;
+  joinedAt: string;
+};
+
+export type LibraryStatus = "played" | "playing" | "backlog";
+
+export type LibraryEntry = {
+  username: string;
+  gameId: string;
+  status: LibraryStatus;
+  /** Half-heart steps from 0.5 to 5, or null when the player has not rated the game. */
+  rating: number | null;
+  updatedAt: string;
+};
+
+export type LibraryItem = {
+  game: Game;
+  entry: LibraryEntry;
+};
+
+export type PlayerReview = {
+  game: Game;
+  review: Review;
+};
+
 export type Review = {
   id: string;
   gameId: string;
