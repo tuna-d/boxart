@@ -1,4 +1,4 @@
-const placeholderTones = ["#22404d", "#3b2a4d", "#4a2f24", "#233d2e", "#2d3350", "#4a2438"];
+import { toneFor } from "@/lib/tone";
 
 const sizes = {
   sm: {
@@ -10,14 +10,6 @@ const sizes = {
     title: "right-4 bottom-4 left-4 text-2xl",
   },
 };
-
-function toneFor(title: string) {
-  let hash = 0;
-  for (const char of title) {
-    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  }
-  return placeholderTones[hash % placeholderTones.length];
-}
 
 type GameCoverProps = {
   title: string;
