@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "Sign in",
 };
 
+const errorMessages: Record<string, string> = {
+  confirm: "That sign-in link is invalid or has expired. Try again, or join again for a new link.",
+  google: "Could not reach Google. Try again in a moment.",
+};
+
 export default async function SignInPage(props: PageProps<"/sign-in">) {
   if (await getCurrentPlayer()) redirect("/");
   const { error } = await props.searchParams;
@@ -22,9 +27,9 @@ export default async function SignInPage(props: PageProps<"/sign-in">) {
         <p className="text-ink-soft">Load your save and pick up where you left off.</p>
       </div>
 
-      {error === "confirm" && (
+      {typeof error === "string" && Object.hasOwn(errorMessages, error) && (
         <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
-          That confirmation link is invalid or has expired. Try signing in, or join again for a new link.
+          {errorMessages[error]}
         </p>
       )}
 
