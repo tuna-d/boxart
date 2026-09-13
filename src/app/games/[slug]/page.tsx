@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GameCover } from "@/components/game-cover";
+import { LogControls } from "@/components/log-controls";
 import { ReviewTable } from "@/components/review-table";
 import { ScorePanel } from "@/components/score-panel";
 import { getGameBySlug, getPopularReviews, getRatingStats } from "@/lib/games";
-
-const logStatuses = ["Played", "Playing", "Backlog"];
 
 export async function generateMetadata(props: PageProps<"/games/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
@@ -38,23 +36,7 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
           <p className="text-sm tracking-wide text-ink-soft uppercase">{meta.join(" / ")}</p>
           <p className="max-w-2xl leading-relaxed text-pretty text-ink-soft">{game.summary}</p>
 
-          <div className="mt-3 flex flex-wrap gap-2.5 text-sm font-semibold uppercase">
-            {logStatuses.map((status) => (
-              <Link
-                key={status}
-                href="/sign-in"
-                className="flex h-11 items-center border-2 border-ink px-3.5 hover:border-accent hover:text-accent"
-              >
-                [ ] {status}
-              </Link>
-            ))}
-          </div>
-          <Link
-            href="/sign-in"
-            className="flex h-13 w-fit items-center bg-p1 px-5 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
-          >
-            Press start to log
-          </Link>
+          <LogControls game={{ title: game.title, platforms: game.platforms }} />
         </section>
 
         <div className="md:col-span-2 xl:col-span-1">
