@@ -44,6 +44,13 @@ export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
       ref={dialogRef}
       aria-labelledby={`${id}-title`}
       onClose={onClose}
+      onKeyDown={(event) => {
+        // Some embedded browsers skip the native Escape handling, so close it ourselves.
+        if (event.key === "Escape" && !event.defaultPrevented) {
+          event.preventDefault();
+          dialogRef.current?.close();
+        }
+      }}
       className="m-auto max-h-[calc(100dvh-2rem)] w-[min(560px,calc(100%-2rem))] overflow-y-auto border-4 border-accent bg-screen text-ink backdrop:bg-screen/80"
     >
       <form onSubmit={save} className="flex flex-col gap-6 p-6">
