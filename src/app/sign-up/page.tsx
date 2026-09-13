@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth-form";
+import { getCurrentPlayer } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Join",
 };
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  if (await getCurrentPlayer()) redirect("/");
+
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 px-6 pt-14 pb-20">
       <div className="flex flex-col gap-4">

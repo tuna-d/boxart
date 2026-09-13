@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth-form";
+import { getCurrentPlayer } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Sign in",
 };
 
-export default function SignInPage() {
+export default async function SignInPage(props: PageProps<"/sign-in">) {
+  if (await getCurrentPlayer()) redirect("/");
+  const { error } = await props.searchParams;
+
   return (
     <main className="mx-auto flex max-w-md flex-col gap-8 px-6 pt-14 pb-20">
       <div className="flex flex-col gap-4">
@@ -16,6 +21,12 @@ export default function SignInPage() {
         </h1>
         <p className="text-ink-soft">Load your save and pick up where you left off.</p>
       </div>
+
+      {error === "confirm" && (
+        <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
+          That confirmation link is invalid or has expired. Try signing in, or join again for a new link.
+        </p>
+      )}
 
       <AuthForm mode="sign-in" />
 
