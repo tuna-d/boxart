@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { signOut } from "@/app/auth/actions";
+import { getCurrentPlayer } from "@/lib/auth";
 
 const navLinks = [
   { href: "/games", label: "Games" },
@@ -6,7 +8,9 @@ const navLinks = [
   { href: "/players", label: "Players" },
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const player = await getCurrentPlayer();
+
   return (
     <header className="border-b-4 border-accent">
       <div className="flex h-19 items-center gap-4 px-6 md:gap-9 md:px-10">
@@ -38,13 +42,29 @@ export function SiteHeader() {
           />
         </form>
 
-        <div className="ml-auto flex gap-4 font-pixel text-sm whitespace-nowrap uppercase md:gap-6 md:text-[15px] lg:ml-0">
-          <Link href="/sign-in" className="text-p1 hover:text-ink">
-            <span className="hidden sm:inline">1P </span>Sign in
-          </Link>
-          <Link href="/sign-up" className="text-p2 hover:text-ink">
-            <span className="hidden sm:inline">2P </span>Join
-          </Link>
+        <div className="ml-auto flex items-center gap-4 font-pixel text-sm whitespace-nowrap uppercase md:gap-6 md:text-[15px] lg:ml-0">
+          {player ? (
+            <>
+              <span className="max-w-[40vw] truncate text-accent">
+                <span className="hidden sm:inline">1P </span>
+                {player.username ?? "Player"}
+              </span>
+              <form action={signOut}>
+                <button type="submit" className="uppercase text-p2 hover:text-ink">
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link href="/sign-in" className="text-p1 hover:text-ink">
+                <span className="hidden sm:inline">1P </span>Sign in
+              </Link>
+              <Link href="/sign-up" className="text-p2 hover:text-ink">
+                <span className="hidden sm:inline">2P </span>Join
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
