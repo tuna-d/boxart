@@ -16,7 +16,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Boxart",
+  title: { default: "Boxart", template: "%s · Boxart" },
   description: "A social diary for the games you play.",
 };
 
