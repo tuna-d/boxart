@@ -1,37 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+import { signIn, signUp, type AuthState } from "@/app/auth/actions";
 import { TextField } from "@/components/text-field";
 
 type AuthFormProps = {
   mode: "sign-in" | "sign-up";
 };
 
-const submitStyles = {
-  "sign-in": { label: "Press start", color: "bg-p1" },
-  "sign-up": { label: "Insert coin", color: "bg-p2" },
+const modes = {
+  "sign-in": { action: signIn, label: "Press start", pendingLabel: "Loading...", color: "bg-p1" },
+  "sign-up": { action: signUp, label: "Insert coin", pendingLabel: "Creating...", color: "bg-p2" },
 };
 
 export function AuthForm({ mode }: AuthFormProps) {
-  const [notice, setNotice] = useState(false);
-  const submit = submitStyles[mode];
+  const settings = modes[mode];
+  const [state, formAction, pending] = useActionState<AuthState, FormData>(settings.action, null);
+  const [googleNotice, setGoogleNotice] = useState(false);
 
-  // Accounts are not connected yet, so both paths only show a notice for now.
-  function showNotice(event?: React.FormEvent) {
-    event?.preventDefault();
-    setNotice(true);
+  if (state?.message) {
+    return (
+      <p role="status" className="border-2 border-dashed border-p2 p-4 leading-relaxed text-p2">
+        {state.message}
+      </p>
+    );
   }
 
   return (
     <div className="flex flex-col gap-6">
       <button
         type="button"
-        onClick={() => showNotice()}
+        onClick={() => setGoogleNotice(true)}
         className="flex h-12 items-center justify-center gap-3 border-2 border-ink bg-ink font-semibold text-screen hover:border-accent hover:bg-accent"
       >
         <GoogleMark />
         Continue with Google
       </button>
+      {googleNotice && (
+        <p role="status" className="border-2 border-dashed border-accent p-3 text-sm text-accent">
+          Google sign-in is not switched on yet. Use your email for now.
+        </p>
+      )}
 
       <div className="flex items-center gap-3 font-pixel text-xs text-muted" aria-hidden="true">
         <span className="h-0.5 flex-1 bg-line" />
@@ -39,7 +48,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <span className="h-0.5 flex-1 bg-line" />
       </div>
 
-      <form onSubmit={showNotice} className="flex flex-col gap-5">
+      <form action={formAction} className="flex flex-col gap-5">
         {mode === "sign-up" && (
           <TextField
             id="username"
@@ -50,10 +59,19 @@ export function AuthForm({ mode }: AuthFormProps) {
             minLength={3}
             maxLength={20}
             pattern="[a-zA-Z0-9_.]+"
+            defaultValue={state?.username}
             hint="3-20 characters: letters, numbers, dots and underscores."
           />
         )}
-        <TextField id="email" name="email" type="email" label="Email" autoComplete="email" required />
+        <TextField
+          id="email"
+          name="email"
+          type="email"
+          label="Email"
+          autoComplete="email"
+          required
+          defaultValue={state?.email}
+        />
         <TextField
           id="password"
           name="password"
@@ -64,19 +82,21 @@ export function AuthForm({ mode }: AuthFormProps) {
           minLength={mode === "sign-up" ? 8 : undefined}
           hint={mode === "sign-up" ? "At least 8 characters." : undefined}
         />
+
+        {state?.error && (
+          <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
+            {state.error}
+          </p>
+        )}
+
         <button
           type="submit"
-          className={`mt-2 h-13 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none ${submit.color}`}
+          disabled={pending}
+          className={`mt-2 h-13 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-70 ${settings.color}`}
         >
-          {submit.label}
+          {pending ? settings.pendingLabel : settings.label}
         </button>
       </form>
-
-      {notice && (
-        <p role="status" className="border-2 border-dashed border-accent p-3 text-sm text-accent">
-          Accounts are not switched on yet. This screen is ready for when they are.
-        </p>
-      )}
     </div>
   );
 }
