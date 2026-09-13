@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { signIn, signUp, type AuthState } from "@/app/auth/actions";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { signIn, signInWithGoogle, signUp, type AuthState } from "@/app/auth/actions";
 import { TextField } from "@/components/text-field";
 
 type AuthFormProps = {
@@ -16,7 +17,6 @@ const modes = {
 export function AuthForm({ mode }: AuthFormProps) {
   const settings = modes[mode];
   const [state, formAction, pending] = useActionState<AuthState, FormData>(settings.action, null);
-  const [googleNotice, setGoogleNotice] = useState(false);
 
   if (state?.message) {
     return (
@@ -28,19 +28,9 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <button
-        type="button"
-        onClick={() => setGoogleNotice(true)}
-        className="flex h-12 items-center justify-center gap-3 border-2 border-ink bg-ink font-semibold text-screen hover:border-accent hover:bg-accent"
-      >
-        <GoogleMark />
-        Continue with Google
-      </button>
-      {googleNotice && (
-        <p role="status" className="border-2 border-dashed border-accent p-3 text-sm text-accent">
-          Google sign-in is not switched on yet. Use your email for now.
-        </p>
-      )}
+      <form action={signInWithGoogle}>
+        <GoogleButton />
+      </form>
 
       <div className="flex items-center gap-3 font-pixel text-xs text-muted" aria-hidden="true">
         <span className="h-0.5 flex-1 bg-line" />
@@ -98,6 +88,21 @@ export function AuthForm({ mode }: AuthFormProps) {
         </button>
       </form>
     </div>
+  );
+}
+
+function GoogleButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex h-12 w-full items-center justify-center gap-3 border-2 border-ink bg-ink font-semibold text-screen hover:border-accent hover:bg-accent disabled:cursor-wait disabled:opacity-70"
+    >
+      <GoogleMark />
+      {pending ? "Opening Google..." : "Continue with Google"}
+    </button>
   );
 }
 
