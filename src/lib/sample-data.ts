@@ -1,0 +1,115 @@
+import type { Game, RatingStats, Review } from "./types";
+
+export const sampleGames: Game[] = [
+  {
+    id: "outer-wilds",
+    slug: "outer-wilds",
+    title: "Outer Wilds",
+    summary:
+      "A solar system stuck in a 22-minute loop that ends when the sun explodes. Every run you keep only what you learned.",
+    releaseDate: "2019-05-28",
+    developers: ["Mobius Digital"],
+    genres: ["Adventure", "Puzzle"],
+    platforms: ["PC", "PS5", "Xbox Series", "Switch"],
+    coverUrl: null,
+  },
+  {
+    id: "hollow-knight",
+    slug: "hollow-knight",
+    title: "Hollow Knight",
+    summary:
+      "A small knight descends into a ruined insect kingdom full of old secrets, sharp bosses and maps you have to buy.",
+    releaseDate: "2017-02-24",
+    developers: ["Team Cherry"],
+    genres: ["Platform", "Adventure"],
+    platforms: ["PC", "PS4", "Xbox One", "Switch"],
+    coverUrl: null,
+  },
+  {
+    id: "celeste",
+    slug: "celeste",
+    title: "Celeste",
+    summary:
+      "Madeline climbs a mountain that pushes back. Tight jumps, a thousand retries and a story about anxiety that lands.",
+    releaseDate: "2018-01-25",
+    developers: ["Maddy Makes Games"],
+    genres: ["Platform", "Indie"],
+    platforms: ["PC", "PS4", "Xbox One", "Switch"],
+    coverUrl: null,
+  },
+];
+
+export const sampleRatingStats: Record<string, RatingStats> = {
+  "outer-wilds": { average: 4.4, count: 18204, distribution: [310, 402, 1480, 5220, 10792] },
+  "hollow-knight": { average: 4.3, count: 22931, distribution: [420, 690, 2410, 7880, 11531] },
+  celeste: { average: 4.2, count: 15377, distribution: [260, 540, 2130, 5910, 6537] },
+};
+
+export const sampleReviews: Review[] = [
+  {
+    id: "r1",
+    gameId: "outer-wilds",
+    author: { username: "mara_plays" },
+    rating: 5,
+    body: "The only game I wish I could forget so I could play it for the first time again. Twenty-two minutes has never felt this big.",
+    platform: "PC",
+    hoursPlayed: 31,
+    likes: 1214,
+    createdAt: "2026-03-02",
+  },
+  {
+    id: "r2",
+    gameId: "outer-wilds",
+    author: { username: "okan.dev" },
+    rating: 4,
+    body: "Half of it is reading ship logs, and somehow that half is the best part. The controls fought me for the first two hours.",
+    platform: "Switch",
+    hoursPlayed: 18,
+    likes: 386,
+    createdAt: "2026-05-19",
+  },
+  {
+    id: "r3",
+    gameId: "outer-wilds",
+    author: { username: "quietlobby" },
+    rating: 4.5,
+    body: "Went in blind, wrote notes on paper like it was 1996. The ending made me sit in silence for a while.",
+    platform: "PS5",
+    hoursPlayed: 24,
+    likes: 201,
+    createdAt: "2026-07-08",
+  },
+  {
+    id: "r4",
+    gameId: "outer-wilds",
+    author: { username: "deniz_k" },
+    rating: 3,
+    body: "Brilliant idea, but the anglerfish section almost made me quit. Worth pushing through, barely.",
+    platform: "PC",
+    hoursPlayed: 15,
+    likes: 94,
+    createdAt: "2026-08-21",
+  },
+  {
+    id: "r5",
+    gameId: "hollow-knight",
+    author: { username: "mara_plays" },
+    rating: 5,
+    body: "Every corner of the map hides something. I got lost for hours and loved being lost.",
+    platform: "Switch",
+    hoursPlayed: 52,
+    likes: 640,
+    createdAt: "2026-01-14",
+  },
+  {
+    id: "r6",
+    gameId: "celeste",
+    author: { username: "okan.dev" },
+    rating: 4.5,
+    body: "Died 2,400 times and never once felt it was unfair. The B-sides are a different story.",
+    platform: "PC",
+    hoursPlayed: 20,
+    likes: 312,
+    createdAt: "2026-04-03",
+  },
+];
