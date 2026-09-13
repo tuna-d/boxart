@@ -32,7 +32,7 @@ export function HeartRating({ value, size = "sm" }: HeartRatingProps) {
   );
 }
 
-function PixelHeart({ className, style }: { className: string; style?: React.CSSProperties }) {
+export function PixelHeart({ className, style }: { className: string; style?: React.CSSProperties }) {
   return (
     <svg
       viewBox="0 0 7 6"
