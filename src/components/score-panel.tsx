@@ -6,7 +6,7 @@ export function ScorePanel({ stats }: { stats: RatingStats }) {
   return (
     <aside aria-label="Player ratings" className="flex h-fit flex-col gap-3 border-2 border-line p-5">
       <span className="font-pixel text-sm text-ink-soft">Hi-score</span>
-      <span className="text-[88px] leading-none font-semibold tracking-tight text-accent tabular-nums">
+      <span className="font-pixel text-[80px] leading-none text-accent">
         {stats.average.toFixed(1)}
       </span>
       <span className="text-[13px] text-muted uppercase">
