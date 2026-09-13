@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { HeartRating } from "@/components/heart-rating";
 import type { Review } from "@/lib/types";
 
@@ -43,9 +44,12 @@ export function ReviewTable({ reviews }: { reviews: Review[] }) {
               >
                 <span className={`font-pixel text-xl ${color}`}>{ordinal(index + 1)}</span>
                 <span className="flex min-w-0 flex-col gap-1">
-                  <span className={`truncate font-pixel text-[17px] uppercase ${color}`}>
+                  <Link
+                    href={`/players/${encodeURIComponent(review.author.username)}`}
+                    className={`truncate font-pixel text-[17px] uppercase hover:text-ink hover:underline ${color}`}
+                  >
                     {review.author.username}
-                  </span>
+                  </Link>
                   <span className="text-sm text-muted">
                     {review.platform}
                     {review.hoursPlayed !== null && ` · ${review.hoursPlayed}h`}
