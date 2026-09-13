@@ -9,10 +9,10 @@ const navLinks = [
 export function SiteHeader() {
   return (
     <header className="border-b-4 border-accent">
-      <div className="flex h-19 items-center gap-9 px-6 md:px-10">
+      <div className="flex h-19 items-center gap-4 px-6 md:gap-9 md:px-10">
         <Link
           href="/"
-          className="font-pixel text-[34px] leading-none font-bold tracking-wide text-accent"
+          className="font-pixel text-2xl leading-none font-bold tracking-wide text-accent md:text-[34px]"
         >
           BOXART
         </Link>
@@ -38,12 +38,12 @@ export function SiteHeader() {
           />
         </form>
 
-        <div className="ml-auto flex gap-6 font-pixel text-[15px] whitespace-nowrap uppercase lg:ml-0">
+        <div className="ml-auto flex gap-4 font-pixel text-sm whitespace-nowrap uppercase md:gap-6 md:text-[15px] lg:ml-0">
           <Link href="/sign-in" className="text-p1 hover:text-ink">
-            1P Sign in
+            <span className="hidden sm:inline">1P </span>Sign in
           </Link>
           <Link href="/sign-up" className="text-p2 hover:text-ink">
-            2P Join
+            <span className="hidden sm:inline">2P </span>Join
           </Link>
         </div>
       </div>
