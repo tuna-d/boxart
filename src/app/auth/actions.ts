@@ -104,6 +104,16 @@ export async function signUp(_previous: AuthState, formData: FormData): Promise<
   return { message: `Almost there. Open the link we sent to ${email} to start playing.` };
 }
 
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${await siteOrigin()}/auth/confirm` },
+  });
+
+  redirect(error || !data.url ? "/sign-in?error=google" : data.url);
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
