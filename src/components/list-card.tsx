@@ -18,18 +18,19 @@ export function ListCard({ list, hideAuthor = false }: ListCardProps) {
     <article className="group relative flex flex-col gap-4">
       <div aria-hidden="true" className="flex pr-3 pb-1 pl-1">
         {list.previewGames.map((game, index) => (
-          <GameCover
+          // Earlier games sit on top so the stack reads from the first pick.
+          <div
             key={game.slug}
-            title={game.title}
-            imageUrl={game.coverUrl}
-            size="xs"
-            className={`w-[30%] shrink-0 transition-transform group-hover:-translate-y-1 ${index > 0 ? "-ml-[12.5%]" : ""}`}
-          />
+            className={`relative w-[30%] shrink-0 shadow-[8px_0_12px_rgb(0_0_0/0.55)] transition-transform group-hover:-translate-y-1 ${index > 0 ? "-ml-[12.5%]" : ""}`}
+            style={{ zIndex: STACK_SIZE - index }}
+          >
+            <GameCover title={game.title} imageUrl={game.coverUrl} size="xs" className="w-full" />
+          </div>
         ))}
         {Array.from({ length: emptySlots }, (_, index) => (
           <div
             key={index}
-            className={`aspect-[3/4] w-[30%] shrink-0 border-2 border-dashed border-line bg-screen ${
+            className={`aspect-[3/4] w-[30%] shrink-0 border-2 border-dashed border-line/60 ${
               list.previewGames.length + index > 0 ? "-ml-[12.5%]" : ""
             }`}
           />
@@ -38,7 +39,7 @@ export function ListCard({ list, hideAuthor = false }: ListCardProps) {
 
       <div className="flex flex-col gap-1.5">
         <h3 className="font-pixel text-base leading-tight uppercase">
-          <Link href={`/lists/${list.id}`} className="after:absolute after:inset-0 group-hover:text-accent">
+          <Link href={`/lists/${list.id}`} className="after:absolute after:inset-0 after:z-10 group-hover:text-accent">
             {list.title}
           </Link>
         </h3>

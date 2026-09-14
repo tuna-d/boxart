@@ -179,7 +179,7 @@ export default async function ListPage(props: PageProps<"/lists/[id]">) {
                 </Link>
 
                 {isOwner && (
-                  <div className="flex gap-1.5">
+                  <div className="mt-auto flex gap-1.5">
                     {(["up", "down"] as const).map((direction) => {
                       const disabled = direction === "up" ? index === 0 : index === list.entries.length - 1;
                       return (
