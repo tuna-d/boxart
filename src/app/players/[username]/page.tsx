@@ -7,7 +7,9 @@ import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerReviewList } from "@/components/player-review-list";
 import { TabLink } from "@/components/tab-link";
 import { formatMonthYear } from "@/lib/format";
-import { countByStatus, getPlayer, getPlayerLibrary, getPlayerReviews } from "@/lib/players";
+import { getCurrentPlayer } from "@/lib/auth";
+import { countByStatus, getPlayerLibrary, getPlayerReviews } from "@/lib/library";
+import { getPlayer } from "@/lib/players";
 import type { LibraryStatus } from "@/lib/types";
 
 const shelves: { value: LibraryStatus; label: string }[] = [
@@ -33,9 +35,10 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
 
   const searchParams = await props.searchParams;
   const shelf = isShelf(searchParams.shelf) ? searchParams.shelf : "played";
+  const viewer = await getCurrentPlayer();
   const [library, reviews] = await Promise.all([
-    getPlayerLibrary(player.username),
-    getPlayerReviews(player.username),
+    getPlayerLibrary(player.id),
+    getPlayerReviews(player, viewer?.id),
   ]);
   const counts = countByStatus(library);
   const shelfItems = library.filter(({ entry }) => entry.status === shelf);
@@ -94,6 +97,7 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
                 <Link href={`/games/${game.slug}`} className="group flex flex-col gap-3">
                   <GameCover
                     title={game.title}
+                    imageUrl={game.coverUrl}
                     size="sm"
                     className="w-full transition-transform group-hover:-translate-y-1"
                   />

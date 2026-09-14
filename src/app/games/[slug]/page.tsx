@@ -5,7 +5,9 @@ import { LogControls } from "@/components/log-controls";
 import { ReviewTable } from "@/components/review-table";
 import { ScorePanel } from "@/components/score-panel";
 import { releaseYear } from "@/lib/format";
-import { getGameBySlug, getPopularReviews, getRatingStats } from "@/lib/games";
+import { getCurrentPlayer } from "@/lib/auth";
+import { getGameBySlug } from "@/lib/games";
+import { getPopularReviews, getRatingStats } from "@/lib/library";
 
 export async function generateMetadata(props: PageProps<"/games/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
@@ -18,9 +20,10 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
   const game = await getGameBySlug(slug);
   if (!game) notFound();
 
+  const viewer = await getCurrentPlayer();
   const [stats, reviews] = await Promise.all([
     getRatingStats(game),
-    getPopularReviews(game),
+    getPopularReviews(game, viewer?.id),
   ]);
   const meta = [game.developers.join(", "), releaseYear(game.releaseDate), game.platforms.join(" ")].filter(
     Boolean,

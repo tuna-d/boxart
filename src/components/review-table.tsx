@@ -62,7 +62,7 @@ export function ReviewTable({ reviews }: { reviews: Review[] }) {
                   <span className="text-xs text-muted uppercase">likes</span>
                 </span>
                 <span className="md:pt-1">
-                  <HeartRating value={review.rating} />
+                  {review.rating !== null && <HeartRating value={review.rating} />}
                 </span>
                 <p className="basis-full text-[15px] leading-relaxed text-pretty">{review.body}</p>
               </li>

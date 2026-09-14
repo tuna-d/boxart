@@ -16,7 +16,7 @@ export function PlayerReviewList({ reviews }: { reviews: PlayerReview[] }) {
         return (
           <li key={review.id} className="flex gap-5 border-b-2 border-dashed border-line py-5">
             <Link href={href} tabIndex={-1} aria-hidden="true" className="w-14 shrink-0 pt-1 md:w-16">
-              <GameCover title={game.title} size="xs" className="w-full" />
+              <GameCover title={game.title} imageUrl={game.coverUrl} size="xs" className="w-full" />
             </Link>
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -26,7 +26,7 @@ export function PlayerReviewList({ reviews }: { reviews: PlayerReview[] }) {
                 <span className="text-sm text-muted">{releaseYear(game.releaseDate)}</span>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-                <HeartRating value={review.rating} />
+                {review.rating !== null && <HeartRating value={review.rating} />}
                 <span>
                   {review.platform}
                   {review.hoursPlayed !== null && ` · ${review.hoursPlayed}h`}

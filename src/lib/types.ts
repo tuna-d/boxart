@@ -11,6 +11,9 @@ export type Game = {
   coverUrl: string | null;
 };
 
+/** The part of a game that shelves and review lists need, stored with each shelf entry. */
+export type GameSummary = Pick<Game, "id" | "slug" | "title" | "coverUrl" | "releaseDate">;
+
 export type Genre = {
   name: string;
   slug: string;
@@ -27,10 +30,11 @@ export type GameSort = "popular" | "rating" | "newest";
 
 export type GameListItem = {
   game: Game;
-  stats: RatingStats;
+  stats: Pick<RatingStats, "average" | "count">;
 };
 
 export type Player = {
+  id: string;
   username: string;
   bio: string;
   joinedAt: string;
@@ -39,35 +43,37 @@ export type Player = {
 export type LibraryStatus = "played" | "playing" | "backlog";
 
 export type LibraryEntry = {
-  username: string;
-  gameId: string;
+  id: string;
   status: LibraryStatus;
   /** Half-heart steps from 0.5 to 5, or null when the player has not rated the game. */
   rating: number | null;
+  platform: string | null;
+  hoursPlayed: number | null;
+  review: string | null;
   updatedAt: string;
 };
 
 export type LibraryItem = {
-  game: Game;
+  game: GameSummary;
   entry: LibraryEntry;
 };
 
-export type PlayerReview = {
-  game: Game;
-  review: Review;
-};
-
 export type Review = {
+  /** The id of the shelf entry that holds the review. */
   id: string;
-  gameId: string;
   author: {
     username: string;
   };
-  /** Half-heart steps from 0.5 to 5. */
-  rating: number;
+  rating: number | null;
   body: string;
-  platform: string;
+  platform: string | null;
   hoursPlayed: number | null;
   likes: number;
+  likedByViewer: boolean;
   createdAt: string;
+};
+
+export type PlayerReview = {
+  game: GameSummary;
+  review: Review;
 };
