@@ -77,3 +77,14 @@ export type PlayerReview = {
   game: GameSummary;
   review: Review;
 };
+
+export type PlayerSort = "active" | "liked" | "newest";
+
+export type PlayerListItem = {
+  player: Player;
+  gamesCount: number;
+  reviewsCount: number;
+  likesReceived: number;
+  lastActiveAt: string | null;
+  recentGames: Pick<GameSummary, "slug" | "title" | "coverUrl">[];
+};
