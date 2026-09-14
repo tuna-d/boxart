@@ -63,7 +63,8 @@ export function ReviewTable({ reviews, signedIn, path }: ReviewTableProps) {
                   </span>
                 </span>
                 <LikeButton
-                  entryId={review.id}
+                  kind="review"
+                  targetId={review.id}
                   likes={review.likes}
                   liked={review.likedByViewer}
                   signedIn={signedIn}

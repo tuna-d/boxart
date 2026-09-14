@@ -42,7 +42,8 @@ export function PlayerReviewList({ reviews, signedIn, path }: PlayerReviewListPr
               </div>
               <p className="max-w-3xl text-[15px] leading-relaxed text-pretty">{review.body}</p>
               <LikeButton
-                entryId={review.id}
+                kind="review"
+                targetId={review.id}
                 likes={review.likes}
                 liked={review.likedByViewer}
                 signedIn={signedIn}

@@ -9,7 +9,7 @@ export async function toggleReviewLike(formData: FormData) {
   const player = await getCurrentPlayer();
   if (!player) redirect("/sign-in");
 
-  const entryId = Number(formData.get("entryId"));
+  const entryId = Number(formData.get("id"));
   const liked = formData.get("liked") === "true";
   const path = formData.get("path");
   if (!Number.isInteger(entryId) || entryId <= 0) return;
