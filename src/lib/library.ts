@@ -136,7 +136,7 @@ export async function getPopularReviews(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("library_entries")
-    .select(`${ENTRY_COLUMNS}, profiles (username)`)
+    .select(`${ENTRY_COLUMNS}, profiles!library_entries_user_id_fkey (username)`)
     .eq("game_id", Number(game.id))
     .not("review", "is", null)
     .order("likes_count", { ascending: false })
