@@ -55,3 +55,33 @@ export async function updateUsername(_previous: UsernameState, formData: FormDat
   if (wasNew) redirect("/");
   return { username, saved: true };
 }
+
+export type BioState = {
+  error?: string;
+  saved?: boolean;
+  bio?: string;
+} | null;
+
+const BIO_LIMIT = 280;
+
+export async function updateBio(_previous: BioState, formData: FormData): Promise<BioState> {
+  const player = await getCurrentPlayer();
+  if (!player) redirect("/sign-in");
+
+  const value = formData.get("bio");
+  // Collapse runs of blank lines so a bio cannot push the profile apart.
+  const bio = typeof value === "string" ? value.trim().replace(/\n{3,}/g, "\n\n") : "";
+  if (bio.length > BIO_LIMIT) {
+    return { bio, error: `Bios can be up to ${BIO_LIMIT} characters.` };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ bio }).eq("id", player.id);
+  if (error) {
+    return { bio, error: "Could not save your bio. Try again in a moment." };
+  }
+
+  if (player.username) revalidatePath(`/players/${player.username}`);
+  revalidatePath("/players");
+  return { bio, saved: true };
+}
