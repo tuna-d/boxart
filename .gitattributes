@@ -1,0 +1,6 @@
+# Store text with LF line endings in the repository and on checkout.
+* text=auto eol=lf
+
+*.ttf binary
+*.png binary
+*.ico binary
