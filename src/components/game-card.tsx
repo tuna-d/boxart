@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GameCover } from "@/components/game-cover";
+import { releaseYear } from "@/lib/format";
 import type { GameListItem } from "@/lib/types";
 
 export function GameCard({ game, stats }: GameListItem) {
@@ -15,7 +16,7 @@ export function GameCard({ game, stats }: GameListItem) {
           {game.title}
         </span>
         <span className="flex items-baseline justify-between text-xs text-muted">
-          <span>{game.releaseDate.slice(0, 4)}</span>
+          <span>{releaseYear(game.releaseDate)}</span>
           <span className="font-pixel text-sm text-accent">{stats.average.toFixed(1)}</span>
         </span>
       </span>

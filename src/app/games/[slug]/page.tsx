@@ -4,6 +4,7 @@ import { GameCover } from "@/components/game-cover";
 import { LogControls } from "@/components/log-controls";
 import { ReviewTable } from "@/components/review-table";
 import { ScorePanel } from "@/components/score-panel";
+import { releaseYear } from "@/lib/format";
 import { getGameBySlug, getPopularReviews, getRatingStats } from "@/lib/games";
 
 export async function generateMetadata(props: PageProps<"/games/[slug]">): Promise<Metadata> {
@@ -21,7 +22,9 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
     getRatingStats(game.id),
     getPopularReviews(game.id),
   ]);
-  const meta = [game.developers.join(", "), game.releaseDate.slice(0, 4), game.platforms.join(" ")];
+  const meta = [game.developers.join(", "), releaseYear(game.releaseDate), game.platforms.join(" ")].filter(
+    Boolean,
+  );
 
   return (
     <main className="px-6 pt-10 pb-16 md:px-10">

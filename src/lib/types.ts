@@ -3,11 +3,17 @@ export type Game = {
   slug: string;
   title: string;
   summary: string;
-  releaseDate: string;
+  /** ISO date (YYYY-MM-DD), or null when the release date is unknown. */
+  releaseDate: string | null;
   developers: string[];
   genres: string[];
   platforms: string[];
   coverUrl: string | null;
+};
+
+export type Genre = {
+  name: string;
+  slug: string;
 };
 
 export type RatingStats = {

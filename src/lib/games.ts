@@ -9,7 +9,7 @@ const emptyStats: RatingStats = { average: 0, count: 0, distribution: [0, 0, 0, 
 const sorters: Record<GameSort, (a: GameListItem, b: GameListItem) => number> = {
   popular: (a, b) => b.stats.count - a.stats.count,
   rating: (a, b) => b.stats.average - a.stats.average || b.stats.count - a.stats.count,
-  newest: (a, b) => b.game.releaseDate.localeCompare(a.game.releaseDate),
+  newest: (a, b) => (b.game.releaseDate ?? "").localeCompare(a.game.releaseDate ?? ""),
 };
 
 export async function getGameBySlug(slug: string): Promise<Game | null> {

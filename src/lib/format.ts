@@ -18,3 +18,7 @@ export function formatMonthYear(isoDate: string) {
     timeZone: "UTC",
   });
 }
+
+export function releaseYear(releaseDate: string | null) {
+  return releaseDate ? releaseDate.slice(0, 4) : "TBA";
+}

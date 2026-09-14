@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GameCover } from "@/components/game-cover";
 import { HeartRating } from "@/components/heart-rating";
-import { formatDate } from "@/lib/format";
+import { formatDate, releaseYear } from "@/lib/format";
 import type { PlayerReview } from "@/lib/types";
 
 export function PlayerReviewList({ reviews }: { reviews: PlayerReview[] }) {
@@ -23,7 +23,7 @@ export function PlayerReviewList({ reviews }: { reviews: PlayerReview[] }) {
                 <Link href={href} className="font-pixel text-[17px] uppercase hover:text-accent">
                   {game.title}
                 </Link>
-                <span className="text-sm text-muted">{game.releaseDate.slice(0, 4)}</span>
+                <span className="text-sm text-muted">{releaseYear(game.releaseDate)}</span>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
                 <HeartRating value={review.rating} />
