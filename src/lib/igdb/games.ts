@@ -40,10 +40,21 @@ const platformLabels: Record<string, string> = {
   XBOX: "Xbox",
 };
 
+// Current platforms first, everything else keeps IGDB's order after them.
+const platformOrder = ["PC", "PS5", "Xbox Series", "Switch 2", "Switch", "PS4", "Xbox One"];
+
 const SLUG_PATTERN = /^[a-z0-9-]+$/;
 
 function unique(values: string[]) {
   return [...new Set(values)];
+}
+
+function byPlatformOrder(a: string, b: string) {
+  const rank = (label: string) => {
+    const index = platformOrder.indexOf(label);
+    return index === -1 ? platformOrder.length : index;
+  };
+  return rank(a) - rank(b);
 }
 
 function toGame(game: IgdbGame): Game {
@@ -63,7 +74,7 @@ function toGame(game: IgdbGame): Game {
       (game.platforms ?? []).map(
         (platform) => platformLabels[platform.abbreviation ?? ""] ?? platform.abbreviation ?? platform.name,
       ),
-    ),
+    ).sort(byPlatformOrder),
     coverUrl: game.cover
       ? `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${game.cover.image_id}.jpg`
       : null,
@@ -77,7 +88,8 @@ export async function fetchGameBySlug(slug: string): Promise<Game | null> {
 }
 
 export async function fetchGames({ sort, genre }: { sort: GameSort; genre?: string }): Promise<Game[]> {
-  const now = Math.floor(Date.now() / 1000);
+  // Rounded to the hour so the query text, and with it the cached response, stays stable.
+  const now = Math.floor(Date.now() / 3_600_000) * 3600;
   const filters = ["cover != null", PLAYABLE];
   if (genre && SLUG_PATTERN.test(genre)) filters.push(`genres.slug = "${genre}"`);
 
