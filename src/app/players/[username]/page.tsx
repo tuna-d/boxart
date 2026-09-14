@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GameCover } from "@/components/game-cover";
+import { ListCard } from "@/components/list-card";
 import { HeartRating } from "@/components/heart-rating";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerReviewList } from "@/components/player-review-list";
@@ -9,6 +10,7 @@ import { TabLink } from "@/components/tab-link";
 import { formatMonthYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
 import { countByStatus, getPlayerLibrary, getPlayerReviews } from "@/lib/library";
+import { getLists } from "@/lib/lists";
 import { getPlayer } from "@/lib/players";
 import type { LibraryStatus } from "@/lib/types";
 
@@ -36,10 +38,12 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
   const searchParams = await props.searchParams;
   const shelf = isShelf(searchParams.shelf) ? searchParams.shelf : "played";
   const viewer = await getCurrentPlayer();
-  const [library, reviews] = await Promise.all([
+  const [library, reviews, lists] = await Promise.all([
     getPlayerLibrary(player.id),
     getPlayerReviews(player, viewer?.id),
+    getLists({ sort: "recent", authorId: player.id, viewerId: viewer?.id }),
   ]);
+  const isOwnProfile = viewer?.id === player.id;
   const counts = countByStatus(library);
   const shelfItems = library.filter(({ entry }) => entry.status === shelf);
   const profileHref = `/players/${encodeURIComponent(player.username)}`;
@@ -47,6 +51,7 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
   const counters = [
     ...shelves.map((item) => ({ label: item.label, value: counts[item.value] })),
     { label: "Reviews", value: reviews.length },
+    { label: "Lists", value: lists.length },
   ];
 
   return (
@@ -63,7 +68,7 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
         </div>
       </section>
 
-      <dl className="mt-10 grid grid-cols-2 gap-y-2 border-y-2 border-dashed border-line py-5 md:grid-cols-4">
+      <dl className="mt-10 grid grid-cols-2 gap-y-2 border-y-2 border-dashed border-line py-5 sm:grid-cols-3 lg:grid-cols-5">
         {counters.map((counter) => (
           <div key={counter.label} className="flex flex-col gap-2">
             <dt className="font-pixel text-sm text-muted">{counter.label}</dt>
@@ -103,6 +108,30 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
                   />
                   {entry.rating !== null && <HeartRating value={entry.rating} size="xs" />}
                 </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section aria-labelledby="player-lists-heading" className="mt-14">
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <h2 id="player-lists-heading" className="font-pixel text-xl">
+            Lists
+          </h2>
+          {isOwnProfile && (
+            <Link href="/lists/new" className="text-sm font-semibold text-accent uppercase hover:text-ink">
+              + New list
+            </Link>
+          )}
+        </div>
+        {lists.length === 0 ? (
+          <p className="mt-5 text-ink-soft">No lists yet.</p>
+        ) : (
+          <ul className="mt-6 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {lists.map((list) => (
+              <li key={list.id}>
+                <ListCard list={list} hideAuthor />
               </li>
             ))}
           </ul>
