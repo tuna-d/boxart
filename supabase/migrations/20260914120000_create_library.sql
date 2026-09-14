@@ -30,12 +30,13 @@ create index library_entries_reviews_idx on public.library_entries (game_id, lik
 alter table public.library_entries enable row level security;
 
 grant select on public.library_entries to anon, authenticated;
+-- Saving uses an upsert, so both lists cover every column the app sends.
 grant insert (
   game_id, game_slug, game_title, game_cover_url, game_release_date,
-  status, rating, platform, hours_played, review
+  status, rating, platform, hours_played, review, updated_at
 ) on public.library_entries to authenticated;
 grant update (
-  game_slug, game_title, game_cover_url, game_release_date,
+  game_id, game_slug, game_title, game_cover_url, game_release_date,
   status, rating, platform, hours_played, review, updated_at
 ) on public.library_entries to authenticated;
 grant delete on public.library_entries to authenticated;
@@ -146,3 +147,21 @@ as $$
 $$;
 
 grant execute on function public.game_rating_stats(bigint) to anon, authenticated;
+
+-- Average and count for many games at once, for cover grids.
+create function public.games_rating_summary(game_ids bigint[])
+returns table (game_id bigint, average numeric, rating_count bigint)
+language sql
+stable
+set search_path = 
+as $
+  select
+    library_entries.game_id,
+    round(avg(library_entries.rating), 1),
+    count(library_entries.rating)
+  from public.library_entries
+  where library_entries.game_id = any (game_ids) and library_entries.rating is not null
+  group by library_entries.game_id;
+$;
+
+grant execute on function public.games_rating_summary(bigint[]) to anon, authenticated;
