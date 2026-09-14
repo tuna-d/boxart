@@ -14,7 +14,15 @@ import { getListChoices } from "@/lib/lists";
 export async function generateMetadata(props: PageProps<"/games/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const game = await getGameBySlug(slug);
-  return game ? { title: game.title, description: game.summary } : { title: "Game not found" };
+  if (!game) return { title: "Game not found" };
+  return {
+    title: game.title,
+    description: game.summary,
+    // Share the cover when there is one, otherwise the site image from the root layout is used.
+    ...(game.coverUrl && {
+      openGraph: { title: game.title, images: [{ url: game.coverUrl, alt: `${game.title} cover` }] },
+    }),
+  };
 }
 
 export default async function GamePage(props: PageProps<"/games/[slug]">) {
