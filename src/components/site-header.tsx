@@ -71,6 +71,20 @@ export async function SiteHeader() {
           )}
         </div>
       </div>
+
+      <nav
+        aria-label="Sections"
+        className="flex gap-6 border-t-2 border-dashed border-line px-6 py-3 font-pixel text-sm uppercase md:hidden"
+      >
+        {navLinks.map((link) => (
+          <Link key={link.href} href={link.href} className="hover:text-accent">
+            {link.label}
+          </Link>
+        ))}
+        <Link href="/search" className="ml-auto text-muted hover:text-accent">
+          Search
+        </Link>
+      </nav>
     </header>
   );
 }
