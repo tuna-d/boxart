@@ -88,3 +88,40 @@ export type PlayerListItem = {
   lastActiveAt: string | null;
   recentGames: Pick<GameSummary, "slug" | "title" | "coverUrl">[];
 };
+
+export type ListSort = "popular" | "recent";
+
+export type ListSummary = {
+  id: string;
+  title: string;
+  description: string | null;
+  ranked: boolean;
+  author: {
+    id: string;
+    username: string;
+  };
+  itemsCount: number;
+  likes: number;
+  likedByViewer: boolean;
+  createdAt: string;
+  updatedAt: string;
+  /** The first few games on the list, in list order. */
+  previewGames: Pick<GameSummary, "slug" | "title" | "coverUrl">[];
+};
+
+export type ListEntry = {
+  id: string;
+  game: GameSummary;
+};
+
+export type ListDetail = ListSummary & {
+  entries: ListEntry[];
+};
+
+/** One of the viewer's lists, and whether a given game is already on it. */
+export type ListChoice = {
+  id: string;
+  title: string;
+  itemsCount: number;
+  hasGame: boolean;
+};
