@@ -7,7 +7,7 @@ import { ScorePanel } from "@/components/score-panel";
 import { releaseYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
 import { getGameBySlug } from "@/lib/games";
-import { getPopularReviews, getRatingStats } from "@/lib/library";
+import { getPopularReviews, getRatingStats, getViewerEntry } from "@/lib/library";
 
 export async function generateMetadata(props: PageProps<"/games/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
@@ -21,9 +21,10 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
   if (!game) notFound();
 
   const viewer = await getCurrentPlayer();
-  const [stats, reviews] = await Promise.all([
+  const [stats, reviews, entry] = await Promise.all([
     getRatingStats(game),
     getPopularReviews(game, viewer?.id),
+    viewer ? getViewerEntry(game, viewer.id) : null,
   ]);
   const meta = [game.developers.join(", "), releaseYear(game.releaseDate), game.platforms.join(" ")].filter(
     Boolean,
@@ -47,7 +48,11 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
           <p className="text-sm tracking-wide text-ink-soft uppercase">{meta.join(" / ")}</p>
           <p className="max-w-2xl leading-relaxed text-pretty text-ink-soft">{game.summary}</p>
 
-          <LogControls game={{ title: game.title, platforms: game.platforms }} />
+          <LogControls
+            game={{ slug: game.slug, title: game.title, platforms: game.platforms }}
+            entry={entry}
+            signedIn={viewer !== null}
+          />
         </section>
 
         <div className="md:col-span-2 xl:col-span-1">

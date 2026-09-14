@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { removeLogEntry, saveLogEntry, type LogState } from "@/app/games/actions";
 import { HeartRatingInput } from "@/components/heart-rating-input";
 import { TextField } from "@/components/text-field";
-import type { Game, LibraryStatus } from "@/lib/types";
+import type { Game, LibraryEntry, LibraryStatus } from "@/lib/types";
 
 export const logStatuses: { value: LibraryStatus; label: string }[] = [
   { value: "played", label: "Played" },
@@ -16,28 +17,30 @@ const fieldClass =
   "border-2 border-line bg-screen px-3 text-ink placeholder:text-muted hover:border-muted focus:border-accent focus-visible:outline-none";
 
 type LogDialogProps = {
-  game: Pick<Game, "title" | "platforms">;
+  game: Pick<Game, "slug" | "title" | "platforms">;
+  entry: LibraryEntry | null;
   initialStatus: LibraryStatus;
   onClose: () => void;
 };
 
-export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
+export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [status, setStatus] = useState(initialStatus);
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState("");
-  const [notice, setNotice] = useState(false);
+  const [rating, setRating] = useState(entry?.rating ?? 0);
+  const [review, setReview] = useState(entry?.review ?? "");
+  const [saveState, saveAction, saving] = useActionState<LogState, FormData>(saveLogEntry, null);
+  const [removeState, removeAction, removing] = useActionState<LogState, FormData>(removeLogEntry, null);
   const id = useId();
+  const busy = saving || removing;
+  const error = saveState?.error ?? removeState?.error;
 
   useEffect(() => {
     dialogRef.current?.showModal();
   }, []);
 
-  // Accounts are not connected yet, so saving only shows a notice for now.
-  function save(event: React.FormEvent) {
-    event.preventDefault();
-    setNotice(true);
-  }
+  useEffect(() => {
+    if (saveState?.saved || removeState?.removed) dialogRef.current?.close();
+  }, [saveState, removeState]);
 
   return (
     <dialog
@@ -53,10 +56,13 @@ export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
       }}
       className="m-auto max-h-[calc(100dvh-2rem)] w-[min(560px,calc(100%-2rem))] overflow-y-auto border-4 border-accent bg-screen text-ink backdrop:bg-screen/80"
     >
-      <form onSubmit={save} className="flex flex-col gap-6 p-6">
+      <form action={saveAction} className="flex flex-col gap-6 p-6">
+        <input type="hidden" name="slug" value={game.slug} />
+        <input type="hidden" name="rating" value={rating} />
+
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <span className="font-pixel text-sm text-p2">&gt; Log game</span>
+            <span className="font-pixel text-sm text-p2">&gt; {entry ? "Edit log" : "Log game"}</span>
             <h2 id={`${id}-title`} className="font-pixel text-2xl leading-none font-bold uppercase">
               {game.title}
             </h2>
@@ -111,7 +117,13 @@ export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
                 <label htmlFor={`${id}-platform`} className="font-pixel text-sm text-ink-soft">
                   Platform
                 </label>
-                <select id={`${id}-platform`} name="platform" className={`h-12 ${fieldClass}`}>
+                <select
+                  id={`${id}-platform`}
+                  name="platform"
+                  defaultValue={entry?.platform ?? ""}
+                  className={`h-12 ${fieldClass}`}
+                >
+                  <option value="">Not set</option>
                   {game.platforms.map((platform) => (
                     <option key={platform}>{platform}</option>
                   ))}
@@ -124,6 +136,8 @@ export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
                 inputMode="numeric"
                 min={0}
                 max={9999}
+                step={1}
+                defaultValue={entry?.hoursPlayed ?? ""}
                 label="Hours played"
               />
             </div>
@@ -151,13 +165,24 @@ export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
           </>
         )}
 
-        {notice && (
-          <p role="status" className="border-2 border-dashed border-accent p-3 text-sm text-accent">
-            Accounts are not switched on yet, so this log was not saved.
+        {error && (
+          <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
+            {error}
           </p>
         )}
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          {entry && (
+            <button
+              type="submit"
+              formAction={removeAction}
+              formNoValidate
+              disabled={busy}
+              className="mr-auto h-12 px-1 text-sm font-semibold text-p1 uppercase hover:text-ink disabled:opacity-60"
+            >
+              {removing ? "Removing..." : "Remove from shelf"}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => dialogRef.current?.close()}
@@ -167,9 +192,10 @@ export function LogDialog({ game, initialStatus, onClose }: LogDialogProps) {
           </button>
           <button
             type="submit"
-            className="h-12 bg-p1 px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+            disabled={busy}
+            className="h-12 bg-p1 px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-70"
           >
-            Save to shelf
+            {saving ? "Saving..." : "Save to shelf"}
           </button>
         </div>
       </form>
