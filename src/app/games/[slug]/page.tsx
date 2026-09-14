@@ -60,7 +60,7 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
         </div>
       </div>
 
-      <ReviewTable reviews={reviews} />
+      <ReviewTable reviews={reviews} signedIn={viewer !== null} path={`/games/${game.slug}`} />
     </main>
   );
 }

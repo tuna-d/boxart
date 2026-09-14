@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeartRating } from "@/components/heart-rating";
+import { LikeButton } from "@/components/like-button";
 import type { Review } from "@/lib/types";
 
 const rankColors = ["text-accent", "text-p2", "text-p1"];
@@ -11,7 +12,13 @@ function ordinal(rank: number) {
   return rank + (suffixes[(lastTwo - 20) % 10] ?? suffixes[lastTwo] ?? suffixes[0]);
 }
 
-export function ReviewTable({ reviews }: { reviews: Review[] }) {
+type ReviewTableProps = {
+  reviews: Review[];
+  signedIn: boolean;
+  path: string;
+};
+
+export function ReviewTable({ reviews, signedIn, path }: ReviewTableProps) {
   return (
     <section aria-labelledby="reviews-heading" className="mt-14">
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
@@ -55,12 +62,14 @@ export function ReviewTable({ reviews }: { reviews: Review[] }) {
                     {review.hoursPlayed !== null && ` · ${review.hoursPlayed}h`}
                   </span>
                 </span>
-                <span className="flex items-baseline gap-1.5">
-                  <span className={`font-pixel text-lg ${color}`}>
-                    {review.likes.toLocaleString("en-US")}
-                  </span>
-                  <span className="text-xs text-muted uppercase">likes</span>
-                </span>
+                <LikeButton
+                  entryId={review.id}
+                  likes={review.likes}
+                  liked={review.likedByViewer}
+                  signedIn={signedIn}
+                  path={path}
+                  colorClass={color}
+                />
                 <span className="md:pt-1">
                   {review.rating !== null && <HeartRating value={review.rating} />}
                 </span>

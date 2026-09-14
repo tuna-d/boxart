@@ -113,7 +113,7 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
         <h2 id="player-reviews-heading" className="font-pixel text-xl">
           Reviews
         </h2>
-        <PlayerReviewList reviews={reviews} />
+        <PlayerReviewList reviews={reviews} signedIn={viewer !== null} path={profileHref} />
       </section>
     </main>
   );

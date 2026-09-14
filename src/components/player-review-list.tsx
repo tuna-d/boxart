@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { GameCover } from "@/components/game-cover";
 import { HeartRating } from "@/components/heart-rating";
+import { LikeButton } from "@/components/like-button";
 import { formatDate, releaseYear } from "@/lib/format";
 import type { PlayerReview } from "@/lib/types";
 
-export function PlayerReviewList({ reviews }: { reviews: PlayerReview[] }) {
+type PlayerReviewListProps = {
+  reviews: PlayerReview[];
+  signedIn: boolean;
+  path: string;
+};
+
+export function PlayerReviewList({ reviews, signedIn, path }: PlayerReviewListProps) {
   if (reviews.length === 0) {
     return <p className="mt-5 text-ink-soft">No reviews yet.</p>;
   }
@@ -34,10 +41,13 @@ export function PlayerReviewList({ reviews }: { reviews: PlayerReview[] }) {
                 <time dateTime={review.createdAt}>{formatDate(review.createdAt)}</time>
               </div>
               <p className="max-w-3xl text-[15px] leading-relaxed text-pretty">{review.body}</p>
-              <span className="flex items-baseline gap-1.5">
-                <span className="font-pixel text-accent">{review.likes.toLocaleString("en-US")}</span>
-                <span className="text-xs text-muted uppercase">likes</span>
-              </span>
+              <LikeButton
+                entryId={review.id}
+                likes={review.likes}
+                liked={review.likedByViewer}
+                signedIn={signedIn}
+                path={path}
+              />
             </div>
           </li>
         );
