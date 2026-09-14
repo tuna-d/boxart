@@ -153,8 +153,8 @@ create function public.games_rating_summary(game_ids bigint[])
 returns table (game_id bigint, average numeric, rating_count bigint)
 language sql
 stable
-set search_path = 
-as $
+set search_path = ''
+as $$
   select
     library_entries.game_id,
     round(avg(library_entries.rating), 1),
@@ -162,6 +162,6 @@ as $
   from public.library_entries
   where library_entries.game_id = any (game_ids) and library_entries.rating is not null
   group by library_entries.game_id;
-$;
+$$;
 
 grant execute on function public.games_rating_summary(bigint[]) to anon, authenticated;
