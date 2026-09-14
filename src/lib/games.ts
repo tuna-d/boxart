@@ -1,42 +1,42 @@
-import { sampleGames, sampleRatingStats, sampleReviews } from "./sample-data";
-import type { Game, GameListItem, GameSort, RatingStats, Review } from "./types";
+import { fetchGameBySlug, fetchGames, fetchGenres, searchIgdbGames } from "./igdb/games";
+import { sampleRatingStats, sampleReviews } from "./sample-data";
+import type { Game, GameListItem, GameSort, Genre, RatingStats, Review } from "./types";
 
-// These read from sample data until IGDB and Supabase are connected.
-// Pages only depend on these signatures, so swapping the source stays local to this file.
+// Games come from IGDB. Ratings and reviews still read from sample data, keyed
+// by slug, until they move to Supabase.
 
 const emptyStats: RatingStats = { average: 0, count: 0, distribution: [0, 0, 0, 0, 0] };
 
-const sorters: Record<GameSort, (a: GameListItem, b: GameListItem) => number> = {
-  popular: (a, b) => b.stats.count - a.stats.count,
-  rating: (a, b) => b.stats.average - a.stats.average || b.stats.count - a.stats.count,
-  newest: (a, b) => (b.game.releaseDate ?? "").localeCompare(a.game.releaseDate ?? ""),
-};
-
 export async function getGameBySlug(slug: string): Promise<Game | null> {
-  return sampleGames.find((game) => game.slug === slug) ?? null;
+  return fetchGameBySlug(slug);
 }
 
-export async function getRatingStats(gameId: string): Promise<RatingStats> {
-  return sampleRatingStats[gameId] ?? emptyStats;
+export async function getRatingStats(game: Game): Promise<RatingStats> {
+  return sampleRatingStats[game.slug] ?? emptyStats;
+}
+
+async function withStats(games: Game[]): Promise<GameListItem[]> {
+  return Promise.all(games.map(async (game) => ({ game, stats: await getRatingStats(game) })));
 }
 
 export async function listGames({
   sort = "popular",
   genre,
 }: { sort?: GameSort; genre?: string } = {}): Promise<GameListItem[]> {
-  return sampleGames
-    .filter((game) => !genre || game.genres.includes(genre))
-    .map((game) => ({ game, stats: sampleRatingStats[game.id] ?? emptyStats }))
-    .sort(sorters[sort]);
+  return withStats(await fetchGames({ sort, genre }));
 }
 
-export async function listGenres(): Promise<string[]> {
-  return [...new Set(sampleGames.flatMap((game) => game.genres))].sort();
+export async function listGenres(): Promise<Genre[]> {
+  return fetchGenres();
 }
 
-export async function getPopularReviews(gameId: string, limit = 10): Promise<Review[]> {
+export async function searchGames(term: string): Promise<GameListItem[]> {
+  return withStats(await searchIgdbGames(term));
+}
+
+export async function getPopularReviews(game: Game, limit = 10): Promise<Review[]> {
   return sampleReviews
-    .filter((review) => review.gameId === gameId)
+    .filter((review) => review.gameId === game.slug)
     .sort((a, b) => b.likes - a.likes)
     .slice(0, limit);
 }

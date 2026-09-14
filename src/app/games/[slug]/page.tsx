@@ -19,8 +19,8 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
   if (!game) notFound();
 
   const [stats, reviews] = await Promise.all([
-    getRatingStats(game.id),
-    getPopularReviews(game.id),
+    getRatingStats(game),
+    getPopularReviews(game),
   ]);
   const meta = [game.developers.join(", "), releaseYear(game.releaseDate), game.platforms.join(" ")].filter(
     Boolean,
@@ -29,7 +29,12 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
   return (
     <main className="px-6 pt-10 pb-16 md:px-10">
       <div className="grid gap-10 md:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)_300px] xl:gap-11">
-        <GameCover title={game.title} className="w-full max-w-[220px] md:max-w-[300px]" />
+        <GameCover
+          title={game.title}
+          imageUrl={game.coverUrl}
+          eager
+          className="w-full max-w-[220px] md:max-w-[300px]"
+        />
 
         <section className="flex flex-col gap-5">
           <span className="font-pixel text-sm text-p2">&gt; Game selected</span>

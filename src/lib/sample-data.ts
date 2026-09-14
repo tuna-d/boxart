@@ -39,7 +39,7 @@ export const sampleGames: Game[] = [
   },
   {
     id: "hades",
-    slug: "hades",
+    slug: "hades--1",
     title: "Hades",
     summary:
       "The son of the god of the dead fights his way out of the underworld, one failed escape and one family argument at a time.",
@@ -151,7 +151,7 @@ export const sampleRatingStats: Record<string, RatingStats> = {
   "outer-wilds": { average: 4.4, count: 18204, distribution: [310, 402, 1480, 5220, 10792] },
   "hollow-knight": { average: 4.3, count: 22931, distribution: [420, 690, 2410, 7880, 11531] },
   celeste: { average: 4.2, count: 15377, distribution: [260, 540, 2130, 5910, 6537] },
-  hades: { average: 4.4, count: 18400, distribution: [180, 350, 1620, 6400, 9850] },
+  "hades--1": { average: 4.4, count: 18400, distribution: [180, 350, 1620, 6400, 9850] },
   "disco-elysium": { average: 4.3, count: 12600, distribution: [240, 380, 1310, 3900, 6770] },
   "stardew-valley": { average: 4.3, count: 24000, distribution: [150, 420, 2600, 9100, 11730] },
   "portal-2": { average: 4.6, count: 26000, distribution: [120, 260, 1400, 7300, 16920] },

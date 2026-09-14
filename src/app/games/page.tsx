@@ -31,10 +31,8 @@ export default async function GamesPage(props: PageProps<"/games">) {
   const searchParams = await props.searchParams;
   const sort = isGameSort(searchParams.sort) ? searchParams.sort : "popular";
   const genres = await listGenres();
-  const genre =
-    typeof searchParams.genre === "string" && genres.includes(searchParams.genre)
-      ? searchParams.genre
-      : undefined;
+  const activeGenre = genres.find((item) => item.slug === searchParams.genre);
+  const genre = activeGenre?.slug;
   const games = await listGames({ sort, genre });
 
   return (
@@ -59,16 +57,16 @@ export default async function GamesPage(props: PageProps<"/games">) {
           ))}
         </nav>
         <nav aria-label="Filter by genre" className="flex flex-wrap gap-x-5 gap-y-2 text-sm uppercase">
-          {[undefined, ...genres].map((item) => {
-            const active = item === genre;
+          {[{ slug: undefined, name: "All" }, ...genres].map((item) => {
+            const active = item.slug === genre;
             return (
               <Link
-                key={item ?? "all"}
-                href={gamesHref(sort, item)}
+                key={item.slug ?? "all"}
+                href={gamesHref(sort, item.slug)}
                 aria-current={active ? "page" : undefined}
                 className={active ? "text-accent" : "text-ink-soft hover:text-accent"}
               >
-                {active ? `> ${item ?? "All"}` : (item ?? "All")}
+                {active ? `> ${item.name}` : item.name}
               </Link>
             );
           })}
