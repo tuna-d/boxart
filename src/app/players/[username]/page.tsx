@@ -58,7 +58,7 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
           <h1 className="font-pixel text-3xl leading-none font-bold break-all uppercase [text-shadow:4px_4px_0_var(--color-shade)] md:text-5xl">
             {player.username}
           </h1>
-          <p className="max-w-xl text-ink-soft">{player.bio}</p>
+          {player.bio && <p className="max-w-xl text-ink-soft">{player.bio}</p>}
           <span className="text-xs text-muted uppercase">Joined {formatMonthYear(player.joinedAt)}</span>
         </div>
       </section>

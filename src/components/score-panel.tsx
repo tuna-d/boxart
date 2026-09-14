@@ -10,7 +10,7 @@ export function ScorePanel({ stats }: { stats: RatingStats }) {
         {stats.average.toFixed(1)}
       </span>
       <span className="text-[13px] text-muted uppercase">
-        Avg of {stats.count.toLocaleString("en-US")} players
+        Avg of {stats.count.toLocaleString("en-US")} {stats.count === 1 ? "player" : "players"}
       </span>
       <div className="mt-2 flex h-[70px] items-end gap-1.5">
         {stats.distribution.map((count, index) => (
