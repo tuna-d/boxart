@@ -58,7 +58,6 @@ export async function SiteHeader() {
                 title={player.needsUsername ? "Pick a username" : "Your profile"}
                 className="max-w-[40vw] truncate text-accent hover:text-ink"
               >
-                <span className="hidden sm:inline">1P </span>
                 {player.needsUsername ? "Enter name" : (player.username ?? "Player")}
               </Link>
               <form action={signOut}>

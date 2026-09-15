@@ -22,7 +22,7 @@ export default async function Home() {
       >
         <div className="flex max-w-3xl flex-col gap-6">
           <span className="font-pixel text-sm text-p2">
-            &gt; {signedIn ? `Welcome back, 1P ${player.username}` : "Press start"}
+            &gt; {signedIn ? `Welcome back, ${player.username}` : "Press start"}
           </span>
           <h1 className="font-pixel text-4xl leading-tight font-bold [text-shadow:4px_4px_0_var(--color-shade)] md:text-6xl">
             Keep score of every game you play
