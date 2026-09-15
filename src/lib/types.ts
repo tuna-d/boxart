@@ -53,6 +53,15 @@ export type LibraryEntry = {
   updatedAt: string;
 };
 
+export type ShelfFilter = LibraryStatus | "all" | "rated";
+
+export type ShelfSort = "recent" | "rating-high" | "rating-low" | "title";
+
+export type ShelfStats = {
+  counts: Record<ShelfFilter, number>;
+  ratings: RatingStats;
+};
+
 export type LibraryItem = {
   game: GameSummary;
   entry: LibraryEntry;

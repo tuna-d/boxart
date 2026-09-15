@@ -9,6 +9,9 @@ import type {
   PlayerReview,
   RatingStats,
   Review,
+  ShelfFilter,
+  ShelfSort,
+  ShelfStats,
 } from "./types";
 
 const ENTRY_COLUMNS =
@@ -163,16 +166,66 @@ export async function getViewerEntry(game: Pick<Game, "id">, viewerId: string): 
   return data ? toEntry(data) : null;
 }
 
-export async function getPlayerLibrary(playerId: string): Promise<LibraryItem[]> {
+/** Counts for every shelf tab and the player's rating spread, from two light columns per entry. */
+export async function getShelfStats(playerId: string): Promise<ShelfStats> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("library_entries")
-    .select(ENTRY_COLUMNS)
+    .select("status, rating")
     .eq("user_id", playerId)
+    .overrideTypes<{ status: LibraryStatus; rating: number | null }[], { merge: false }>();
+  if (error) throw new Error(`Could not load the shelf: ${error.message}`);
+
+  const counts: Record<ShelfFilter, number> = { all: 0, played: 0, playing: 0, backlog: 0, rated: 0 };
+  const distribution: RatingStats["distribution"] = [0, 0, 0, 0, 0];
+  let total = 0;
+  for (const { status, rating } of data ?? []) {
+    counts.all += 1;
+    counts[status] += 1;
+    if (rating === null) continue;
+    const value = Number(rating);
+    counts.rated += 1;
+    total += value;
+    // Same buckets as the game page: up to one heart, up to two, and so on.
+    distribution[Math.min(Math.ceil(value) - 1, 4)] += 1;
+  }
+
+  return {
+    counts,
+    ratings: {
+      average: counts.rated ? Math.round((total / counts.rated) * 10) / 10 : 0,
+      count: counts.rated,
+      distribution,
+    },
+  };
+}
+
+export async function getPlayerShelf(
+  playerId: string,
+  { filter, sort, limit }: { filter: ShelfFilter; sort: ShelfSort; limit: number },
+): Promise<{ items: LibraryItem[]; hasMore: boolean }> {
+  const supabase = await createClient();
+  let request = supabase.from("library_entries").select(ENTRY_COLUMNS).eq("user_id", playerId);
+
+  if (filter === "rated") request = request.not("rating", "is", null);
+  else if (filter !== "all") request = request.eq("status", filter);
+
+  if (sort === "rating-high") request = request.order("rating", { ascending: false, nullsFirst: false });
+  if (sort === "rating-low") request = request.order("rating", { ascending: true, nullsFirst: false });
+  if (sort === "title") request = request.order("game_title", { ascending: true });
+
+  // Ask for one extra row to know whether there is another page.
+  const { data, error } = await request
     .order("updated_at", { ascending: false })
+    .limit(limit + 1)
     .overrideTypes<EntryRow[], { merge: false }>();
   if (error) throw new Error(`Could not load the shelf: ${error.message}`);
-  return (data ?? []).map((row) => ({ game: toGameSummary(row), entry: toEntry(row) }));
+
+  const rows = data ?? [];
+  return {
+    items: rows.slice(0, limit).map((row) => ({ game: toGameSummary(row), entry: toEntry(row) })),
+    hasMore: rows.length > limit,
+  };
 }
 
 export async function getPlayerReviews(
@@ -192,10 +245,4 @@ export async function getPlayerReviews(
   const rows = data ?? [];
   const liked = await likedEntryIds(rows.map((row) => row.id), viewerId);
   return rows.map((row) => ({ game: toGameSummary(row), review: toReview(row, liked, player.username) }));
-}
-
-export function countByStatus(library: LibraryItem[]): Record<LibraryStatus, number> {
-  const counts: Record<LibraryStatus, number> = { played: 0, playing: 0, backlog: 0 };
-  for (const { entry } of library) counts[entry.status] += 1;
-  return counts;
 }
