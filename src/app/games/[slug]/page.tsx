@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToList } from "@/components/add-to-list";
 import { FriendsWhoPlayed } from "@/components/friends-who-played";
@@ -6,8 +7,9 @@ import { GameCover } from "@/components/game-cover";
 import { LogControls } from "@/components/log-controls";
 import { ReviewTable } from "@/components/review-table";
 import { ScorePanel } from "@/components/score-panel";
-import { releaseYear } from "@/lib/format";
+import { formatDate, releaseYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
+import { getDiaryPlays } from "@/lib/diary";
 import { getGameBySlug } from "@/lib/games";
 import { getPopularReviews, getRatingStats, getViewerEntry } from "@/lib/library";
 import { getListChoices } from "@/lib/lists";
@@ -33,12 +35,13 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
   if (!game) notFound();
 
   const viewer = await getCurrentPlayer();
-  const [stats, reviews, entry, listChoices, friendPlays] = await Promise.all([
+  const [stats, reviews, entry, listChoices, friendPlays, diaryPlays] = await Promise.all([
     getRatingStats(game),
     getPopularReviews(game, viewer?.id),
     viewer ? getViewerEntry(game, viewer.id) : null,
     viewer ? getListChoices(viewer.id, game.id) : null,
     viewer ? getFriendsWhoPlayed(viewer.id, game.id) : [],
+    viewer ? getDiaryPlays(viewer.id, game.id) : null,
   ]);
   const meta = [game.developers.join(", "), releaseYear(game.releaseDate), game.platforms.join(" ")].filter(
     Boolean,
@@ -67,6 +70,19 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
             entry={entry}
             signedIn={viewer !== null}
           />
+          {diaryPlays && viewer?.username && (
+            <p className="text-sm text-ink-soft">
+              <span className="font-pixel text-p2">&gt;</span> You played this{" "}
+              {diaryPlays.count === 1 ? "once" : <span className="font-pixel text-accent">{diaryPlays.count} times</span>}{" "}
+              · {diaryPlays.count === 1 ? "on" : "last on"}{" "}
+              <Link
+                href={`/players/${encodeURIComponent(viewer.username)}/diary?month=${diaryPlays.lastPlayedOn.slice(0, 7)}`}
+                className="text-accent hover:text-ink hover:underline"
+              >
+                {formatDate(diaryPlays.lastPlayedOn)}
+              </Link>
+            </p>
+          )}
           {listChoices && <AddToList slug={game.slug} lists={listChoices} />}
           <FriendsWhoPlayed plays={friendPlays} gameTitle={game.title} />
         </section>
