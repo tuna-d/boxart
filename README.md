@@ -96,6 +96,7 @@ GitHub Actions runs on every push. The end-to-end job needs the same four values
 | `npm run build` | Build for production |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run ESLint |
+| `npm run typecheck` | Generate Next.js route types and run the TypeScript checker |
 | `npm test` | Run the unit tests with Vitest |
 | `npm run test:e2e` | Run the Playwright tests, starting the dev server if it is not running. Set `E2E_BASE_URL` to test a deployed site |
 
