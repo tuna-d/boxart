@@ -87,7 +87,7 @@ export function NotificationBell({ items, unread }: NotificationBellProps) {
             </Link>
           </div>
           {items.length === 0 ? (
-            <p className="px-4 py-5 text-ink-soft">No notifications yet. New followers and replies show up here.</p>
+            <p className="px-4 py-5 text-ink-soft">No notifications yet. New followers, replies and likes show up here.</p>
           ) : (
             <ul className="max-h-[60vh] overflow-y-auto">
               {items.map((item) => (
@@ -116,6 +116,16 @@ export function NotificationRow({
   onNavigate?: () => void;
 }) {
   const profileHref = `/players/${encodeURIComponent(item.actor.username)}`;
+  const target =
+    item.kind === "list_like"
+      ? { href: `/lists/${item.list.id}`, before: "liked your list", title: item.list.title }
+      : item.kind === "follow"
+        ? null
+        : {
+            href: `/reviews/${item.review.id}`,
+            before: item.kind === "reply" ? "replied to your review of" : "liked your review of",
+            title: item.review.gameTitle,
+          };
 
   return (
     <li
@@ -131,15 +141,15 @@ export function NotificationRow({
         <Link href={profileHref} onClick={onNavigate} className="font-pixel break-all hover:text-accent">
           {item.actor.username}
         </Link>{" "}
-        {item.kind === "reply" ? (
+        {target ? (
           <span className="text-ink-soft">
-            replied to your review of{" "}
+            {target.before}{" "}
             <Link
-              href={`/reviews/${item.review.id}`}
+              href={target.href}
               onClick={onNavigate}
               className="font-semibold text-ink hover:text-accent hover:underline"
             >
-              {item.review.gameTitle}
+              {target.title}
             </Link>
           </span>
         ) : (
@@ -150,7 +160,7 @@ export function NotificationRow({
           {timeAgo(item.createdAt)}
         </time>
       </p>
-      {item.kind === "follow" ? (
+      {!target && item.kind === "follow" ? (
         <FollowButton
           targetId={item.actor.id}
           username={item.actor.username}
@@ -162,7 +172,7 @@ export function NotificationRow({
         />
       ) : (
         <Link
-          href={`/reviews/${item.review.id}`}
+          href={target?.href ?? profileHref}
           onClick={onNavigate}
           className="flex h-8 shrink-0 items-center border-2 border-line px-2.5 font-pixel text-[11px] whitespace-nowrap uppercase hover:border-accent hover:text-accent"
         >

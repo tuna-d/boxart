@@ -178,7 +178,8 @@ export async function getNotifications(
       .from("notifications")
       .select(
         "id, kind, created_at, read_at, actor:profiles!notifications_actor_id_fkey (id, username), " +
-          "entry:library_entries!notifications_entry_id_fkey (id, game_title)",
+          "entry:library_entries!notifications_entry_id_fkey (id, game_title), " +
+          "list:lists!notifications_list_id_fkey (id, title)",
       )
       .eq("recipient_id", viewerId)
       .order("created_at", { ascending: false })
@@ -191,6 +192,7 @@ export async function getNotifications(
           read_at: string | null;
           actor: ProfileEmbed;
           entry: { id: number; game_title: string } | null;
+          list: { id: number; title: string } | null;
         }[],
         { merge: false }
       >(),
@@ -209,10 +211,13 @@ export async function getNotifications(
     items: (list.data ?? []).flatMap((row): NotificationItem[] => {
       if (!row.actor) return [];
       const base = { id: String(row.id), actor: row.actor, createdAt: row.created_at, read: row.read_at !== null };
-      if (row.kind === "reply") {
+      if (row.kind === "reply" || row.kind === "review_like") {
         return row.entry
-          ? [{ ...base, kind: "reply", review: { id: String(row.entry.id), gameTitle: row.entry.game_title } }]
+          ? [{ ...base, kind: row.kind, review: { id: String(row.entry.id), gameTitle: row.entry.game_title } }]
           : [];
+      }
+      if (row.kind === "list_like") {
+        return row.list ? [{ ...base, kind: "list_like", list: { id: String(row.list.id), title: row.list.title } }] : [];
       }
       return [{ ...base, kind: "follow", followingBack: following.has(row.actor.id) }];
     }),

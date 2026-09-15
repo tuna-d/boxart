@@ -194,9 +194,14 @@ export type NotificationItem =
       followingBack: boolean;
     })
   | (NotificationBase & {
-      kind: "reply";
-      /** The viewer's review that got the reply. */
+      kind: "reply" | "review_like";
+      /** The viewer's review that got the reply or the like. */
       review: { id: string; gameTitle: string };
+    })
+  | (NotificationBase & {
+      kind: "list_like";
+      /** The viewer's list that got the like. */
+      list: { id: string; title: string };
     });
 
 export type DiaryEntry = {

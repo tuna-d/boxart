@@ -28,7 +28,7 @@ export default async function NotificationsPage() {
 
       <div className="mt-8 border-2 border-line">
         {items.length === 0 ? (
-          <p className="px-4 py-5 text-ink-soft">No notifications yet. New followers and replies show up here.</p>
+          <p className="px-4 py-5 text-ink-soft">No notifications yet. New followers, replies and likes show up here.</p>
         ) : (
           <ul>
             {items.map((item) => (
