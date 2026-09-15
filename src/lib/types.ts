@@ -134,3 +134,50 @@ export type ListChoice = {
   itemsCount: number;
   hasGame: boolean;
 };
+
+export type FollowCounts = {
+  followers: number;
+  following: number;
+};
+
+/** A player shown in follower lists, suggestions and notifications. */
+export type PlayerLink = {
+  id: string;
+  username: string;
+};
+
+export type ShelfActivity = {
+  kind: "played" | "playing" | "backlog" | "rated" | "reviewed";
+  id: string;
+  player: PlayerLink;
+  game: GameSummary;
+  rating: number | null;
+  review: string | null;
+  at: string;
+};
+
+export type ListActivity = {
+  kind: "list";
+  id: string;
+  player: PlayerLink;
+  list: { id: string; title: string; itemsCount: number };
+  at: string;
+};
+
+export type ActivityItem = ShelfActivity | ListActivity;
+
+export type NotificationItem = {
+  id: string;
+  kind: "follow";
+  actor: PlayerLink;
+  createdAt: string;
+  read: boolean;
+  /** Whether the viewer already follows the player behind the notification. */
+  followingBack: boolean;
+};
+
+export type FriendPlay = {
+  player: PlayerLink;
+  status: LibraryStatus;
+  rating: number | null;
+};

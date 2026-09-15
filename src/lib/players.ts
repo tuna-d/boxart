@@ -35,11 +35,17 @@ type PlayerRow = {
 export async function listPlayers({
   sort = "active",
   query,
-}: { sort?: PlayerSort; query?: string } = {}): Promise<PlayerListItem[]> {
+  onlyIds,
+}: { sort?: PlayerSort; query?: string; onlyIds?: string[] } = {}): Promise<PlayerListItem[]> {
+  if (onlyIds && onlyIds.length === 0) return [];
   // Usernames only use letters, numbers, dots and underscores, so drop anything else before matching.
   const name = query?.replace(/[^a-zA-Z0-9_.]/g, "").replace(/_/g, "\\_") ?? "";
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("list_players", { sort_by: sort, name_query: name || null });
+  const { data, error } = await supabase.rpc("list_players", {
+    sort_by: sort,
+    name_query: name || null,
+    only_ids: onlyIds ?? null,
+  });
   if (error) throw new Error(`Could not load players: ${error.message}`);
 
   return ((data ?? []) as PlayerRow[]).map((row) => ({
