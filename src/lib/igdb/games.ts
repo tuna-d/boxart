@@ -31,7 +31,9 @@ const GAME_FIELDS = [
 
 // Main games, remakes, remasters and expanded editions. Leaves out DLC, bundles and mods.
 const PLAYABLE = "game_type = (0,8,9,10)";
-const LIST_LIMIT = 36;
+export const GAMES_PAGE_SIZE = 36;
+/** How deep the catalogue can be scrolled, to keep IGDB requests in check. */
+export const GAMES_MAX_OFFSET = GAMES_PAGE_SIZE * 20;
 
 const platformLabels: Record<string, string> = {
   "Series X|S": "Xbox Series",
@@ -87,7 +89,16 @@ export async function fetchGameBySlug(slug: string): Promise<Game | null> {
   return game ? toGame(game) : null;
 }
 
-export async function fetchGames({ sort, genre }: { sort: GameSort; genre?: string }): Promise<Game[]> {
+export async function fetchGames({
+  sort,
+  genre,
+  offset = 0,
+}: {
+  sort: GameSort;
+  genre?: string;
+  offset?: number;
+}): Promise<Game[]> {
+  const safeOffset = Number.isInteger(offset) ? Math.min(Math.max(offset, 0), GAMES_MAX_OFFSET) : 0;
   // Rounded to the hour so the query text, and with it the cached response, stays stable.
   const now = Math.floor(Date.now() / 3_600_000) * 3600;
   const filters = ["cover != null", PLAYABLE];
@@ -109,7 +120,7 @@ export async function fetchGames({ sort, genre }: { sort: GameSort; genre?: stri
 
   const games = await igdbQuery<IgdbGame>(
     "games",
-    `fields ${GAME_FIELDS}; where ${filters.join(" & ")}; sort ${order}; limit ${LIST_LIMIT};`,
+    `fields ${GAME_FIELDS}; where ${filters.join(" & ")}; sort ${order}; limit ${GAMES_PAGE_SIZE}; offset ${safeOffset};`,
   );
   return games.map(toGame);
 }

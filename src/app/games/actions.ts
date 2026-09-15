@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentPlayer } from "@/lib/auth";
 import { DIARY_FIRST_DAY, DIARY_NOTE_LIMIT, isoDay, isValidDay } from "@/lib/calendar";
-import { getGameBySlug } from "@/lib/games";
+import { getGameBySlug, listGames } from "@/lib/games";
 import { createClient } from "@/lib/supabase/server";
-import type { Game, LibraryStatus } from "@/lib/types";
+import type { Game, GameListItem, GameSort, LibraryStatus } from "@/lib/types";
 
 export type LogState = {
   error?: string;
@@ -144,4 +144,20 @@ export async function removeLogEntry(_previous: LogState, formData: FormData): P
 
   refreshPages(game, player.username);
   return { removed: true };
+}
+
+const GAME_SORTS: GameSort[] = ["popular", "rating", "newest"];
+
+/** The next page of the games catalogue, for infinite scrolling. */
+export async function loadMoreGames({
+  sort,
+  genre,
+  offset,
+}: {
+  sort: GameSort;
+  genre?: string;
+  offset: number;
+}): Promise<GameListItem[]> {
+  if (!GAME_SORTS.includes(sort) || !Number.isInteger(offset) || offset < 0) return [];
+  return listGames({ sort, genre, offset });
 }

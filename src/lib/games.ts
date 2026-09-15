@@ -11,8 +11,9 @@ export async function getGameBySlug(slug: string): Promise<Game | null> {
 export async function listGames({
   sort = "popular",
   genre,
-}: { sort?: GameSort; genre?: string } = {}): Promise<GameListItem[]> {
-  return withRatingSummaries(await fetchGames({ sort, genre }));
+  offset = 0,
+}: { sort?: GameSort; genre?: string; offset?: number } = {}): Promise<GameListItem[]> {
+  return withRatingSummaries(await fetchGames({ sort, genre, offset }));
 }
 
 export async function listGenres(): Promise<Genre[]> {
