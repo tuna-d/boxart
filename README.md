@@ -4,6 +4,16 @@ A social diary for the games you play. Log what you played, rate it with hearts,
 
 Boxart is a portfolio project in the spirit of Letterboxd, built for games. Its look borrows from arcade attract screens: pixel type, scanlines, heart containers and a scoreboard for reviews.
 
+**Live site:** [boxart-seven.vercel.app](https://boxart-seven.vercel.app)
+
+![A game page with its Boxart score, rating histogram and top reviews](docs/screenshots/game.png)
+
+| Player profile | Ranked list |
+| --- | --- |
+| ![A player profile with shelf tabs, sorting and a ratings panel](docs/screenshots/profile.png) | ![A ranked list of roguelikes](docs/screenshots/list.png) |
+
+![The lists page with stacked cover cards](docs/screenshots/lists.png)
+
 ## Features
 
 - **Game catalogue** from IGDB with popular, top rated and newest sorting, genre filters and search.
@@ -11,8 +21,10 @@ Boxart is a portfolio project in the spirit of Letterboxd, built for games. Its 
 - **Shelves.** Mark a game as played, playing or backlog. You can add a half-heart rating, platform, hours played and a review.
 - **Likes** on reviews and lists, updated optimistically.
 - **Lists.** Players can make ranked or unranked lists, add games from search or from a game page, reorder and remove them.
-- **Profiles** with shelves, reviews, lists and a bio, plus a player directory that you can sort and search.
-- **Accounts** with email and password or Google, and a first-run step to pick a username.
+- **Profiles** with every logged game in shelf tabs, sorting, a ratings panel, reviews, lists and a bio, plus a player directory that you can sort and search.
+- **Follows.** Players follow each other, see what friends logged, rated, reviewed and listed in a feed on the home screen, and see which friends played a game on its page.
+- **Notifications** for new followers, with a bell in the header and a follow back button.
+- **Accounts** with email and password or Google, a keep me signed in option and a first-run step to pick a username.
 
 ## Stack
 
@@ -30,6 +42,7 @@ Boxart is a portfolio project in the spirit of Letterboxd, built for games. Its 
 - **The database enforces the rules.** Every table has Row Level Security, and players can only write their own rows. Column grants limit what can be written. Triggers keep like counts, list sizes and list order in step, so the client can never set them directly.
 - **Aggregates live in SQL functions.** Rating stats, batch rating summaries for cover grids and the player directory are Postgres functions called over RPC.
 - **Mutations are server actions.** Pages revalidate after each change.
+- **Notifications come from the database.** A trigger writes a notification when someone follows a player, so the app never has to remember to send one.
 
 ## Getting started
 
