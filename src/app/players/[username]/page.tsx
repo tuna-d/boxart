@@ -1,27 +1,52 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GameCover } from "@/components/game-cover";
 import { ListCard } from "@/components/list-card";
-import { HeartRating } from "@/components/heart-rating";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerReviewList } from "@/components/player-review-list";
+import { ScorePanel } from "@/components/score-panel";
+import { ShelfCard } from "@/components/shelf-card";
 import { TabLink } from "@/components/tab-link";
 import { formatMonthYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
-import { countByStatus, getPlayerLibrary, getPlayerReviews } from "@/lib/library";
+import { getPlayerReviews, getPlayerShelf, getShelfStats } from "@/lib/library";
 import { getLists } from "@/lib/lists";
 import { getPlayer } from "@/lib/players";
-import type { LibraryStatus } from "@/lib/types";
+import type { ShelfFilter, ShelfSort } from "@/lib/types";
 
-const shelves: { value: LibraryStatus; label: string }[] = [
+const PAGE_SIZE = 48;
+const MAX_SHOWN = 480;
+
+const shelves: { value: ShelfFilter; label: string }[] = [
+  { value: "all", label: "All" },
   { value: "played", label: "Played" },
   { value: "playing", label: "Playing" },
   { value: "backlog", label: "Backlog" },
+  { value: "rated", label: "Rated" },
 ];
 
-function isShelf(value: unknown): value is LibraryStatus {
+const sortOptions: { value: ShelfSort; label: string }[] = [
+  { value: "recent", label: "Recently logged" },
+  { value: "rating-high", label: "Highest rated" },
+  { value: "rating-low", label: "Lowest rated" },
+  { value: "title", label: "A-Z" },
+];
+
+function isShelf(value: unknown): value is ShelfFilter {
   return shelves.some((shelf) => shelf.value === value);
+}
+
+function isShelfSort(value: unknown): value is ShelfSort {
+  return sortOptions.some((option) => option.value === value);
+}
+
+function shelfHref(base: string, shelf: ShelfFilter, sort: ShelfSort, shown = PAGE_SIZE) {
+  const params = new URLSearchParams();
+  if (shelf !== "all") params.set("shelf", shelf);
+  if (sort !== "recent") params.set("sort", sort);
+  if (shown > PAGE_SIZE) params.set("shown", String(shown));
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
 }
 
 export async function generateMetadata(props: PageProps<"/players/[username]">): Promise<Metadata> {
@@ -36,20 +61,25 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
   if (!player) notFound();
 
   const searchParams = await props.searchParams;
-  const shelf = isShelf(searchParams.shelf) ? searchParams.shelf : "played";
+  const shelf = isShelf(searchParams.shelf) ? searchParams.shelf : "all";
+  const sort = isShelfSort(searchParams.sort) ? searchParams.sort : "recent";
+  const requested = Number(searchParams.shown);
+  const shown = Number.isInteger(requested) ? Math.min(Math.max(requested, PAGE_SIZE), MAX_SHOWN) : PAGE_SIZE;
   const viewer = await getCurrentPlayer();
-  const [library, reviews, lists] = await Promise.all([
-    getPlayerLibrary(player.id),
+  const [stats, shelfPage, reviews, lists] = await Promise.all([
+    getShelfStats(player.id),
+    getPlayerShelf(player.id, { filter: shelf, sort, limit: shown }),
     getPlayerReviews(player, viewer?.id),
     getLists({ sort: "recent", authorId: player.id, viewerId: viewer?.id }),
   ]);
   const isOwnProfile = viewer?.id === player.id;
-  const counts = countByStatus(library);
-  const shelfItems = library.filter(({ entry }) => entry.status === shelf);
+  const { counts } = stats;
   const profileHref = `/players/${encodeURIComponent(player.username)}`;
 
   const counters = [
-    ...shelves.map((item) => ({ label: item.label, value: counts[item.value] })),
+    { label: "Played", value: counts.played },
+    { label: "Playing", value: counts.playing },
+    { label: "Backlog", value: counts.backlog },
     { label: "Reviews", value: reviews.length },
     { label: "Lists", value: lists.length },
   ];
@@ -84,42 +114,70 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
         ))}
       </dl>
 
-      <section aria-labelledby="shelves-heading" className="mt-12">
-        <h2 id="shelves-heading" className="sr-only">
-          Shelves
-        </h2>
-        <nav aria-label="Shelves" className="flex flex-wrap gap-2">
-          {shelves.map((item) => (
-            <TabLink
-              key={item.value}
-              href={item.value === "played" ? profileHref : `${profileHref}?shelf=${item.value}`}
-              active={item.value === shelf}
-            >
-              {item.label} · {counts[item.value]}
-            </TabLink>
-          ))}
-        </nav>
+      <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <section aria-labelledby="shelves-heading" className="min-w-0">
+          <h2 id="shelves-heading" className="font-pixel text-xl">
+            Games
+          </h2>
+          <div className="mt-5 flex flex-col gap-4 border-y-2 border-dashed border-line py-4">
+            <nav aria-label="Shelves" className="flex flex-wrap gap-2">
+              {shelves.map((item) => (
+                <TabLink key={item.value} href={shelfHref(profileHref, item.value, sort)} active={item.value === shelf}>
+                  {item.label} · {counts[item.value]}
+                </TabLink>
+              ))}
+            </nav>
+            <nav aria-label="Sort games" className="flex flex-wrap gap-x-5 gap-y-2 text-sm uppercase">
+              {sortOptions.map((option) => {
+                const active = option.value === sort;
+                return (
+                  <Link
+                    key={option.value}
+                    href={shelfHref(profileHref, shelf, option.value)}
+                    aria-current={active ? "page" : undefined}
+                    className={active ? "text-accent" : "text-ink-soft hover:text-accent"}
+                  >
+                    {active ? `> ${option.label}` : option.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-        {shelfItems.length === 0 ? (
-          <p className="mt-8 text-ink-soft">Nothing on this shelf yet.</p>
-        ) : (
-          <ul className="mt-8 grid grid-cols-3 gap-x-5 gap-y-8 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
-            {shelfItems.map(({ game, entry }) => (
-              <li key={game.id}>
-                <Link href={`/games/${game.slug}`} className="group flex flex-col gap-3">
-                  <GameCover
-                    title={game.title}
-                    imageUrl={game.coverUrl}
-                    size="sm"
-                    className="w-full transition-transform group-hover:-translate-y-1"
-                  />
-                  {entry.rating !== null && <HeartRating value={entry.rating} size="xs" />}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {shelfPage.items.length === 0 ? (
+            <p className="mt-8 text-ink-soft">
+              {shelf === "rated" ? "No rated games yet." : "Nothing on this shelf yet."}
+            </p>
+          ) : (
+            <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+              {shelfPage.items.map((item) => (
+                <li key={item.game.id}>
+                  <ShelfCard {...item} showStatus={shelf === "all" || shelf === "rated"} />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {shelfPage.hasMore && shown < MAX_SHOWN && (
+            <Link
+              href={shelfHref(profileHref, shelf, sort, shown + PAGE_SIZE)}
+              scroll={false}
+              className="mt-10 flex h-11 w-fit items-center border-2 border-ink px-4 text-sm font-semibold uppercase hover:border-accent hover:text-accent"
+            >
+              Load more
+            </Link>
+          )}
+        </section>
+
+        <div className="lg:pt-12">
+          <ScorePanel
+            stats={stats.ratings}
+            title="Ratings"
+            countNoun="game"
+            label={`${player.username}'s ratings`}
+          />
+        </div>
+      </div>
 
       <section aria-labelledby="player-lists-heading" className="mt-14">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
