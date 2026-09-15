@@ -176,6 +176,23 @@ export type NotificationItem = {
   followingBack: boolean;
 };
 
+export type DiaryEntry = {
+  id: string;
+  game: GameSummary;
+  /** ISO date (YYYY-MM-DD) of the day the game was played. */
+  playedOn: string;
+  replay: boolean;
+  rating: number | null;
+  note: string | null;
+  createdAt: string;
+};
+
+/** How often the viewer has logged a game in their diary. */
+export type DiaryPlays = {
+  count: number;
+  lastPlayedOn: string;
+};
+
 export type FriendPlay = {
   player: PlayerLink;
   status: LibraryStatus;
