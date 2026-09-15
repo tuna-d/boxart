@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GameCard } from "@/components/game-card";
+import { GameGrid } from "@/components/game-grid";
 import { TabLink } from "@/components/tab-link";
 import { listGames, listGenres } from "@/lib/games";
+import { GAMES_MAX_OFFSET, GAMES_PAGE_SIZE } from "@/lib/igdb/games";
 import type { GameSort } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -73,17 +74,15 @@ export default async function GamesPage(props: PageProps<"/games">) {
         </nav>
       </div>
 
-      <p className="mt-6 text-sm text-muted uppercase">
-        {games.length} {games.length === 1 ? "game" : "games"}
-      </p>
-
-      <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-        {games.map((item) => (
-          <li key={item.game.id}>
-            <GameCard {...item} />
-          </li>
-        ))}
-      </ul>
+      {/* A new sort or genre starts a fresh list. */}
+      <GameGrid
+        key={`${sort}-${genre ?? "all"}`}
+        initialItems={games}
+        sort={sort}
+        genre={genre}
+        pageSize={GAMES_PAGE_SIZE}
+        maxOffset={GAMES_MAX_OFFSET}
+      />
     </main>
   );
 }

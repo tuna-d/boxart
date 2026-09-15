@@ -22,6 +22,20 @@ test.describe("signed-out visitor", () => {
     await expect(page.getByRole("link", { name: "Press start to log" })).toHaveAttribute("href", "/sign-in");
   });
 
+  test("keeps loading games while scrolling and can jump back to the top", async ({ page }) => {
+    await page.goto("/games");
+    const cards = page.locator('main ul > li a[href^="/games/"]');
+    await expect(cards.first()).toBeVisible();
+
+    await page.mouse.wheel(0, 20_000);
+    await expect.poll(() => cards.count(), { timeout: 30_000 }).toBeGreaterThan(36);
+
+    const backToTop = page.getByRole("button", { name: "Back to top" });
+    await expect(backToTop).toBeVisible();
+    await backToTop.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
   test("searches for a game", async ({ page }) => {
     await page.goto("/search?q=celeste");
     await expect(page.getByText(/results? for "celeste"/i)).toBeVisible();
