@@ -94,15 +94,16 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
             {player.username}
           </h1>
           {player.bio && <p className="max-w-xl whitespace-pre-line text-ink-soft">{player.bio}</p>}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <span className="text-xs text-muted uppercase">Joined {formatMonthYear(player.joinedAt)}</span>
-            {isOwnProfile && (
-              <Link href="/settings" className="text-xs font-semibold text-accent uppercase hover:text-ink">
-                {player.bio ? "Edit profile" : "Add a bio"}
-              </Link>
-            )}
-          </div>
+          <span className="text-xs text-muted uppercase">Joined {formatMonthYear(player.joinedAt)}</span>
         </div>
+        {isOwnProfile && (
+          <Link
+            href="/settings"
+            className="flex h-11 w-fit shrink-0 items-center border-2 border-ink px-4 text-sm font-semibold uppercase hover:border-accent hover:text-accent md:ml-auto"
+          >
+            Settings
+          </Link>
+        )}
       </section>
 
       <dl className="mt-10 grid grid-cols-2 gap-y-2 border-y-2 border-dashed border-line py-5 sm:grid-cols-3 lg:grid-cols-5">

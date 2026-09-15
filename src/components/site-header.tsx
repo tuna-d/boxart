@@ -46,8 +46,12 @@ export async function SiteHeader() {
           {player ? (
             <>
               <Link
-                href="/settings"
-                title="Settings"
+                href={
+                  player.needsUsername || !player.username
+                    ? "/settings"
+                    : `/players/${encodeURIComponent(player.username)}`
+                }
+                title={player.needsUsername ? "Pick a username" : "Your profile"}
                 className="max-w-[40vw] truncate text-accent hover:text-ink"
               >
                 <span className="hidden sm:inline">1P </span>
