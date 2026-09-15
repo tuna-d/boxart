@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FollowButton } from "@/components/follow-button";
 import { ListCard } from "@/components/list-card";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerReviewList } from "@/components/player-review-list";
@@ -9,6 +10,7 @@ import { ShelfCard } from "@/components/shelf-card";
 import { TabLink } from "@/components/tab-link";
 import { formatMonthYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
+import { getFollowCounts, getFollowingIds } from "@/lib/follows";
 import { getPlayerReviews, getPlayerShelf, getShelfStats } from "@/lib/library";
 import { getLists } from "@/lib/lists";
 import { getPlayer } from "@/lib/players";
@@ -66,13 +68,18 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
   const requested = Number(searchParams.shown);
   const shown = Number.isInteger(requested) ? Math.min(Math.max(requested, PAGE_SIZE), MAX_SHOWN) : PAGE_SIZE;
   const viewer = await getCurrentPlayer();
-  const [stats, shelfPage, reviews, lists] = await Promise.all([
+  const isOwnProfile = viewer?.id === player.id;
+  const [stats, shelfPage, reviews, lists, followCounts, viewerFollowing, playerFollowing] = await Promise.all([
     getShelfStats(player.id),
     getPlayerShelf(player.id, { filter: shelf, sort, limit: shown }),
     getPlayerReviews(player, viewer?.id),
     getLists({ sort: "recent", authorId: player.id, viewerId: viewer?.id }),
+    getFollowCounts(player.id),
+    viewer && !isOwnProfile ? getFollowingIds(viewer.id) : ([] as string[]),
+    viewer && !isOwnProfile ? getFollowingIds(player.id) : ([] as string[]),
   ]);
-  const isOwnProfile = viewer?.id === player.id;
+  const viewerFollows = viewerFollowing.includes(player.id);
+  const followsViewer = viewer !== null && playerFollowing.includes(viewer.id);
   const { counts } = stats;
   const profileHref = `/players/${encodeURIComponent(player.username)}`;
 
@@ -94,15 +101,35 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
             {player.username}
           </h1>
           {player.bio && <p className="max-w-xl whitespace-pre-line text-ink-soft">{player.bio}</p>}
-          <span className="text-xs text-muted uppercase">Joined {formatMonthYear(player.joinedAt)}</span>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs uppercase">
+            <Link href={`${profileHref}/followers`} className="text-ink-soft hover:text-accent">
+              <span className="font-pixel text-sm text-accent">{followCounts.followers}</span>{" "}
+              {followCounts.followers === 1 ? "follower" : "followers"}
+            </Link>
+            <Link href={`${profileHref}/following`} className="text-ink-soft hover:text-accent">
+              <span className="font-pixel text-sm text-accent">{followCounts.following}</span> following
+            </Link>
+            <span className="text-muted">Joined {formatMonthYear(player.joinedAt)}</span>
+            {followsViewer && <span className="border-2 border-line px-1.5 py-0.5 text-muted">Follows you</span>}
+          </div>
         </div>
-        {isOwnProfile && (
+        {isOwnProfile ? (
           <Link
             href="/settings"
             className="flex h-11 w-fit shrink-0 items-center border-2 border-ink px-4 text-sm font-semibold uppercase hover:border-accent hover:text-accent md:ml-auto"
           >
             Settings
           </Link>
+        ) : (
+          <div className="md:ml-auto">
+            <FollowButton
+              targetId={player.id}
+              username={player.username}
+              following={viewerFollows}
+              signedIn={viewer !== null}
+              path={profileHref}
+            />
+          </div>
         )}
       </section>
 
