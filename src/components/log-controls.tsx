@@ -13,7 +13,7 @@ type LogControlsProps = {
 
 const statusClass = "flex h-11 items-center border-2 px-3.5 uppercase hover:border-accent hover:text-accent";
 const startClass =
-  "flex h-13 w-fit items-center bg-p1 px-5 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none";
+  "flex h-13 w-fit items-center px-5 font-pixel text-lg key-button";
 
 export function LogControls({ game, entry, signedIn }: LogControlsProps) {
   const [dialogStatus, setDialogStatus] = useState<LibraryStatus | null>(null);

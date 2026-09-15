@@ -27,7 +27,7 @@ export default function ErrorScreen({
         <button
           type="button"
           onClick={() => retry()}
-          className="flex h-13 items-center bg-p1 px-6 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+          className="flex h-13 items-center px-6 font-pixel text-lg key-button"
         >
           Continue?
         </button>

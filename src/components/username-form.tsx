@@ -42,7 +42,7 @@ export function UsernameForm({ currentUsername, isNew }: UsernameFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 h-13 bg-p2 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-70"
+        className="mt-2 h-13 font-pixel text-lg key-button key-button-cyan disabled:cursor-wait disabled:opacity-70"
       >
         {pending ? "Saving..." : isNew ? "Start playing" : "Save username"}
       </button>

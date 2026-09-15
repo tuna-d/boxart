@@ -36,7 +36,7 @@ export default async function ListsPage(props: PageProps<"/lists">) {
         </div>
         <Link
           href={viewer ? "/lists/new" : "/sign-in"}
-          className="flex h-12 items-center bg-p1 px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+          className="flex h-12 items-center px-5 font-pixel key-button"
         >
           + New list
         </Link>

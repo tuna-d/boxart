@@ -37,7 +37,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
         />
         <button
           type="submit"
-          className="h-12 shrink-0 bg-accent px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+          className="h-12 shrink-0 px-5 font-pixel key-button key-button-yellow"
         >
           Search
         </button>

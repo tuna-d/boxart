@@ -33,7 +33,7 @@ export default async function Home() {
           <div className="mt-4 flex flex-wrap items-center gap-6">
             <Link
               href={signedIn ? "/games" : "/sign-up"}
-              className="flex h-13 items-center bg-p1 px-6 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+              className="flex h-13 items-center px-6 font-pixel text-lg key-button"
             >
               {signedIn ? "Log a game" : "Insert coin"}
             </Link>

@@ -14,7 +14,7 @@ export function DeleteListButton({ listId }: { listId: string }) {
         <>
           <button
             type="submit"
-            className="h-12 bg-p1 px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+            className="h-12 px-5 font-pixel key-button"
           >
             Yes, delete it
           </button>

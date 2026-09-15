@@ -112,7 +112,7 @@ export default async function ListPage(props: PageProps<"/lists/[id]">) {
               />
               <button
                 type="submit"
-                className="h-11 shrink-0 bg-accent px-4 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                className="h-11 shrink-0 px-4 font-pixel key-button key-button-yellow"
               >
                 Search
               </button>

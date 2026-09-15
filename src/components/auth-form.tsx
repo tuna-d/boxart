@@ -10,8 +10,8 @@ type AuthFormProps = {
 };
 
 const modes = {
-  "sign-in": { action: signIn, label: "Press start", pendingLabel: "Loading...", color: "bg-p1" },
-  "sign-up": { action: signUp, label: "Insert coin", pendingLabel: "Creating...", color: "bg-p2" },
+  "sign-in": { action: signIn, label: "Press start", pendingLabel: "Loading...", color: "" },
+  "sign-up": { action: signUp, label: "Insert coin", pendingLabel: "Creating...", color: "key-button-cyan" },
 };
 
 export function AuthForm({ mode }: AuthFormProps) {
@@ -111,7 +111,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <button
           type="submit"
           disabled={pending}
-          className={`mt-2 h-13 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-70 ${settings.color}`}
+          className={`mt-2 h-13 font-pixel text-lg key-button disabled:cursor-wait disabled:opacity-70 ${settings.color}`}
         >
           {pending ? settings.pendingLabel : settings.label}
         </button>

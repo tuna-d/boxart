@@ -50,7 +50,7 @@ export function ReplyForm({ entryId }: { entryId: string }) {
       <button
         type="submit"
         disabled={pending || body.trim().length === 0}
-        className="h-12 w-fit bg-p1 px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
+        className="h-12 w-fit px-5 font-pixel key-button disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Sending..." : "Send reply"}
       </button>

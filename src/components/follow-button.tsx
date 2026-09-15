@@ -33,7 +33,7 @@ export function FollowButton({
   const [optimisticFollowing, setOptimisticFollowing] = useOptimistic(following);
   const [, startTransition] = useTransition();
   const base = `flex w-fit shrink-0 items-center justify-center font-pixel whitespace-nowrap uppercase ${sizes[size]}`;
-  const followClass = `${base} bg-p2 text-screen shadow-[3px_3px_0_var(--color-ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none`;
+  const followClass = `${base} key-button key-button-cyan key-button-small`;
 
   if (!signedIn) {
     return (

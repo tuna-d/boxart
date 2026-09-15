@@ -239,7 +239,7 @@ export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProp
           <button
             type="submit"
             disabled={busy}
-            className="h-12 bg-p1 px-5 font-pixel text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:cursor-wait disabled:opacity-70"
+            className="h-12 px-5 font-pixel key-button disabled:cursor-wait disabled:opacity-70"
           >
             {saving ? "Saving..." : "Save to shelf"}
           </button>

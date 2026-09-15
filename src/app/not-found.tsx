@@ -18,7 +18,7 @@ export default function NotFound() {
       <div className="flex flex-wrap items-center gap-6">
         <Link
           href="/games"
-          className="flex h-13 items-center bg-accent px-6 font-pixel text-lg text-screen shadow-[4px_4px_0_var(--color-ink)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+          className="flex h-13 items-center px-6 font-pixel text-lg key-button key-button-yellow"
         >
           Browse games
         </Link>
