@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
+import { NotificationBell } from "@/components/notification-bell";
 import { getCurrentPlayer } from "@/lib/auth";
+import { getNotifications } from "@/lib/follows";
 
 const navLinks = [
   { href: "/games", label: "Games" },
@@ -10,6 +12,7 @@ const navLinks = [
 
 export async function SiteHeader() {
   const player = await getCurrentPlayer();
+  const notifications = player && !player.needsUsername ? await getNotifications(player.id, 8) : null;
 
   return (
     <header className="border-b-4 border-accent">
@@ -45,6 +48,7 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-4 font-pixel text-sm whitespace-nowrap uppercase md:gap-6 md:text-[15px] lg:ml-0">
           {player ? (
             <>
+              {notifications && <NotificationBell items={notifications.items} unread={notifications.unread} />}
               <Link
                 href={
                   player.needsUsername || !player.username
