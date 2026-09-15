@@ -10,6 +10,7 @@ import { ShelfCard } from "@/components/shelf-card";
 import { TabLink } from "@/components/tab-link";
 import { formatMonthYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
+import { getDiaryCount } from "@/lib/diary";
 import { getFollowCounts, getFollowingIds } from "@/lib/follows";
 import { getPlayerReviews, getPlayerShelf, getShelfStats } from "@/lib/library";
 import { getLists } from "@/lib/lists";
@@ -69,24 +70,27 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
   const shown = Number.isInteger(requested) ? Math.min(Math.max(requested, PAGE_SIZE), MAX_SHOWN) : PAGE_SIZE;
   const viewer = await getCurrentPlayer();
   const isOwnProfile = viewer?.id === player.id;
-  const [stats, shelfPage, reviews, lists, followCounts, viewerFollowing, playerFollowing] = await Promise.all([
-    getShelfStats(player.id),
-    getPlayerShelf(player.id, { filter: shelf, sort, limit: shown }),
-    getPlayerReviews(player, viewer?.id),
-    getLists({ sort: "recent", authorId: player.id, viewerId: viewer?.id }),
-    getFollowCounts(player.id),
-    viewer && !isOwnProfile ? getFollowingIds(viewer.id) : ([] as string[]),
-    viewer && !isOwnProfile ? getFollowingIds(player.id) : ([] as string[]),
-  ]);
+  const [stats, shelfPage, reviews, lists, followCounts, viewerFollowing, playerFollowing, diaryCount] =
+    await Promise.all([
+      getShelfStats(player.id),
+      getPlayerShelf(player.id, { filter: shelf, sort, limit: shown }),
+      getPlayerReviews(player, viewer?.id),
+      getLists({ sort: "recent", authorId: player.id, viewerId: viewer?.id }),
+      getFollowCounts(player.id),
+      viewer && !isOwnProfile ? getFollowingIds(viewer.id) : ([] as string[]),
+      viewer && !isOwnProfile ? getFollowingIds(player.id) : ([] as string[]),
+      getDiaryCount(player.id),
+    ]);
   const viewerFollows = viewerFollowing.includes(player.id);
   const followsViewer = viewer !== null && playerFollowing.includes(viewer.id);
   const { counts } = stats;
   const profileHref = `/players/${encodeURIComponent(player.username)}`;
 
-  const counters = [
+  const counters: { label: string; value: number; href?: string }[] = [
     { label: "Played", value: counts.played },
     { label: "Playing", value: counts.playing },
     { label: "Backlog", value: counts.backlog },
+    { label: "Diary", value: diaryCount, href: `${profileHref}/diary` },
     { label: "Reviews", value: reviews.length },
     { label: "Lists", value: lists.length },
   ];
@@ -133,11 +137,21 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
         )}
       </section>
 
-      <dl className="mt-10 grid grid-cols-2 gap-y-2 border-y-2 border-dashed border-line py-5 sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="mt-10 grid grid-cols-2 gap-y-2 border-y-2 border-dashed border-line py-5 sm:grid-cols-3 lg:grid-cols-6">
         {counters.map((counter) => (
-          <div key={counter.label} className="flex flex-col gap-2">
-            <dt className="font-pixel text-sm text-muted">{counter.label}</dt>
-            <dd className="font-pixel text-4xl text-accent">{counter.value}</dd>
+          <div key={counter.label} className="group relative flex flex-col gap-2">
+            <dt className="font-pixel text-sm text-muted">
+              {counter.href ? (
+                <Link href={counter.href} className="after:absolute after:inset-0 group-hover:text-ink">
+                  {counter.label} &gt;
+                </Link>
+              ) : (
+                counter.label
+              )}
+            </dt>
+            <dd className={`font-pixel text-4xl text-accent ${counter.href ? "group-hover:underline" : ""}`}>
+              {counter.value}
+            </dd>
           </div>
         ))}
       </dl>
