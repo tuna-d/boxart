@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FollowButton } from "@/components/follow-button";
 import { GameCover } from "@/components/game-cover";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { TabLink } from "@/components/tab-link";
+import { getCurrentPlayer } from "@/lib/auth";
+import { getFollowingIds } from "@/lib/follows";
 import { formatMonthYear } from "@/lib/format";
 import { listPlayers } from "@/lib/players";
 import type { PlayerSort } from "@/lib/types";
@@ -21,10 +24,11 @@ function isPlayerSort(value: unknown): value is PlayerSort {
   return sortOptions.some((option) => option.value === value);
 }
 
-function playersHref(sort: PlayerSort, query: string) {
+function playersHref(sort: PlayerSort, query: string, followingOnly: boolean) {
   const params = new URLSearchParams();
   if (sort !== "active") params.set("sort", sort);
   if (query) params.set("q", query);
+  if (followingOnly) params.set("following", "1");
   const search = params.toString();
   return search ? `/players?${search}` : "/players";
 }
@@ -37,7 +41,12 @@ export default async function PlayersPage(props: PageProps<"/players">) {
   const searchParams = await props.searchParams;
   const sort = isPlayerSort(searchParams.sort) ? searchParams.sort : "active";
   const query = typeof searchParams.q === "string" ? searchParams.q.trim() : "";
-  const players = await listPlayers({ sort, query });
+  const viewer = await getCurrentPlayer();
+  const followingIds = viewer ? await getFollowingIds(viewer.id) : [];
+  const followingOnly = viewer !== null && searchParams.following === "1";
+  const players = await listPlayers({ sort, query, onlyIds: followingOnly ? followingIds : undefined });
+  const following = new Set(followingIds);
+  const path = playersHref(sort, query, followingOnly);
 
   return (
     <main className="px-6 pt-10 pb-16 md:px-10">
@@ -51,13 +60,26 @@ export default async function PlayersPage(props: PageProps<"/players">) {
       <div className="mt-8 flex flex-col gap-4 border-y-2 border-dashed border-line py-4 lg:flex-row lg:items-center lg:justify-between">
         <nav aria-label="Sort players" className="flex flex-wrap gap-2">
           {sortOptions.map((option) => (
-            <TabLink key={option.value} href={playersHref(option.value, query)} active={option.value === sort}>
+            <TabLink
+              key={option.value}
+              href={playersHref(option.value, query, followingOnly)}
+              active={option.value === sort}
+            >
               {option.label}
             </TabLink>
           ))}
+          {viewer && (
+            <>
+              <span aria-hidden="true" className="mx-1 w-0.5 self-stretch bg-line" />
+              <TabLink href={playersHref(sort, query, !followingOnly)} active={followingOnly}>
+                Following · {followingIds.length}
+              </TabLink>
+            </>
+          )}
         </nav>
         <form action="/players" role="search" className="flex gap-2">
           {sort !== "active" && <input type="hidden" name="sort" value={sort} />}
+          {followingOnly && <input type="hidden" name="following" value="1" />}
           <label htmlFor="player-search" className="sr-only">
             Username
           </label>
@@ -80,7 +102,13 @@ export default async function PlayersPage(props: PageProps<"/players">) {
       </div>
 
       <p className="mt-6 text-sm text-muted uppercase">
-        {query && players.length === 0 ? `No players match "${query}"` : plural(players.length, "player")}
+        {players.length > 0
+          ? plural(players.length, "player")
+          : query
+            ? `No players match "${query}"`
+            : followingOnly
+              ? "You do not follow anyone yet"
+              : "No players yet"}
       </p>
 
       <ul className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -99,6 +127,18 @@ export default async function PlayersPage(props: PageProps<"/players">) {
                   </Link>
                   <span className="text-xs text-muted uppercase">Joined {formatMonthYear(player.joinedAt)}</span>
                 </div>
+                {viewer && viewer.id !== player.id && (
+                  <div className="relative z-10 ml-auto">
+                    <FollowButton
+                      targetId={player.id}
+                      username={player.username}
+                      following={following.has(player.id)}
+                      signedIn
+                      path={path}
+                      size="sm"
+                    />
+                  </div>
+                )}
               </div>
 
               <dl className="grid grid-cols-3 gap-2 text-center">
