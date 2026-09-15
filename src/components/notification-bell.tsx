@@ -74,7 +74,7 @@ export function NotificationBell({ items, unread }: NotificationBellProps) {
           id={`${id}-panel`}
           role="region"
           aria-label="Notifications"
-          className="absolute top-full right-0 z-50 mt-3 w-[min(360px,calc(100vw-2rem))] border-2 border-accent bg-screen font-mono text-sm normal-case shadow-[6px_6px_0_var(--color-shade)]"
+          className="absolute top-full right-0 z-50 mt-3 w-[min(360px,calc(100vw-2rem))] border-2 border-accent bg-screen font-mono text-sm whitespace-normal normal-case shadow-[6px_6px_0_var(--color-shade)]"
         >
           <div className="flex items-baseline justify-between border-b-2 border-dashed border-line px-4 py-3">
             <span className="font-pixel text-[15px]">Notifications</span>
