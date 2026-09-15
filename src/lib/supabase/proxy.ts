@@ -1,9 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseKey, supabaseUrl } from "./env";
+import { REMEMBER_COOKIE, remembers, withRememberChoice } from "./remember";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const keepSignedIn = remembers(request.cookies.get(REMEMBER_COOKIE)?.value);
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
@@ -16,7 +18,7 @@ export async function updateSession(request: NextRequest) {
         }
         response = NextResponse.next({ request });
         for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options);
+          response.cookies.set(name, value, withRememberChoice(value, options, keepSignedIn));
         }
         for (const [key, value] of Object.entries(headers ?? {})) {
           response.headers.set(key, value);

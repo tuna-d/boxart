@@ -1,7 +1,8 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { REMEMBER_COOKIE, rememberCookieOptions } from "@/lib/supabase/remember";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = {
@@ -23,6 +24,14 @@ function readPassword(formData: FormData) {
   return typeof value === "string" ? value : "";
 }
 
+/** Saves the "keep me signed in" choice. Forms without the checkbox keep players signed in. */
+async function saveRememberChoice(formData: FormData) {
+  const remember = formData.get("remember") !== "0";
+  const cookieStore = await cookies();
+  cookieStore.set(REMEMBER_COOKIE, remember ? "1" : "0", rememberCookieOptions(remember));
+  return remember;
+}
+
 async function siteOrigin() {
   const headerList = await headers();
   const origin = headerList.get("origin");
@@ -39,7 +48,8 @@ export async function signIn(_previous: AuthState, formData: FormData): Promise<
     return { error: "Enter your email and password.", email };
   }
 
-  const supabase = await createClient();
+  const remember = await saveRememberChoice(formData);
+  const supabase = await createClient({ remember });
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
@@ -104,8 +114,10 @@ export async function signUp(_previous: AuthState, formData: FormData): Promise<
   return { message: `Almost there. Open the link we sent to ${email} to start playing.` };
 }
 
-export async function signInWithGoogle() {
-  const supabase = await createClient();
+export async function signInWithGoogle(formData: FormData) {
+  // The session cookies are written later in /auth/confirm, which reads this choice.
+  const remember = await saveRememberChoice(formData);
+  const supabase = await createClient({ remember });
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: { redirectTo: `${await siteOrigin()}/auth/confirm` },
@@ -117,5 +129,6 @@ export async function signInWithGoogle() {
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  (await cookies()).delete(REMEMBER_COOKIE);
   redirect("/");
 }
