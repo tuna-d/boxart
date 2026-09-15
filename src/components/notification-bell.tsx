@@ -87,7 +87,7 @@ export function NotificationBell({ items, unread }: NotificationBellProps) {
             </Link>
           </div>
           {items.length === 0 ? (
-            <p className="px-4 py-5 text-ink-soft">No notifications yet. New followers show up here.</p>
+            <p className="px-4 py-5 text-ink-soft">No notifications yet. New followers and replies show up here.</p>
           ) : (
             <ul className="max-h-[60vh] overflow-y-auto">
               {items.map((item) => (
@@ -131,21 +131,44 @@ export function NotificationRow({
         <Link href={profileHref} onClick={onNavigate} className="font-pixel break-all hover:text-accent">
           {item.actor.username}
         </Link>{" "}
-        <span className="text-ink-soft">started following you</span>
+        {item.kind === "reply" ? (
+          <span className="text-ink-soft">
+            replied to your review of{" "}
+            <Link
+              href={`/reviews/${item.review.id}`}
+              onClick={onNavigate}
+              className="font-semibold text-ink hover:text-accent hover:underline"
+            >
+              {item.review.gameTitle}
+            </Link>
+          </span>
+        ) : (
+          <span className="text-ink-soft">started following you</span>
+        )}
         <br />
         <time dateTime={item.createdAt} className="text-xs text-muted" suppressHydrationWarning>
           {timeAgo(item.createdAt)}
         </time>
       </p>
-      <FollowButton
-        targetId={item.actor.id}
-        username={item.actor.username}
-        following={item.followingBack}
-        signedIn
-        path={path}
-        size="sm"
-        followLabel="Follow back"
-      />
+      {item.kind === "follow" ? (
+        <FollowButton
+          targetId={item.actor.id}
+          username={item.actor.username}
+          following={item.followingBack}
+          signedIn
+          path={path}
+          size="sm"
+          followLabel="Follow back"
+        />
+      ) : (
+        <Link
+          href={`/reviews/${item.review.id}`}
+          onClick={onNavigate}
+          className="flex h-8 shrink-0 items-center border-2 border-line px-2.5 font-pixel text-[11px] whitespace-nowrap uppercase hover:border-accent hover:text-accent"
+        >
+          View
+        </Link>
+      )}
     </li>
   );
 }

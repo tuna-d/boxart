@@ -176,12 +176,22 @@ export async function getNotifications(
   const [list, unread, followingIds] = await Promise.all([
     supabase
       .from("notifications")
-      .select("id, kind, created_at, read_at, actor:profiles!notifications_actor_id_fkey (id, username)")
+      .select(
+        "id, kind, created_at, read_at, actor:profiles!notifications_actor_id_fkey (id, username), " +
+          "entry:library_entries!notifications_entry_id_fkey (id, game_title)",
+      )
       .eq("recipient_id", viewerId)
       .order("created_at", { ascending: false })
       .limit(limit)
       .overrideTypes<
-        { id: number; kind: "follow"; created_at: string; read_at: string | null; actor: ProfileEmbed }[],
+        {
+          id: number;
+          kind: NotificationItem["kind"];
+          created_at: string;
+          read_at: string | null;
+          actor: ProfileEmbed;
+          entry: { id: number; game_title: string } | null;
+        }[],
         { merge: false }
       >(),
     supabase
@@ -196,19 +206,15 @@ export async function getNotifications(
   const following = new Set(followingIds);
   return {
     unread: unread.count ?? 0,
-    items: (list.data ?? []).flatMap((row) =>
-      row.actor
-        ? [
-            {
-              id: String(row.id),
-              kind: row.kind,
-              actor: row.actor,
-              createdAt: row.created_at,
-              read: row.read_at !== null,
-              followingBack: following.has(row.actor.id),
-            },
-          ]
-        : [],
-    ),
+    items: (list.data ?? []).flatMap((row): NotificationItem[] => {
+      if (!row.actor) return [];
+      const base = { id: String(row.id), actor: row.actor, createdAt: row.created_at, read: row.read_at !== null };
+      if (row.kind === "reply") {
+        return row.entry
+          ? [{ ...base, kind: "reply", review: { id: String(row.entry.id), gameTitle: row.entry.game_title } }]
+          : [];
+      }
+      return [{ ...base, kind: "follow", followingBack: following.has(row.actor.id) }];
+    }),
   };
 }
