@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GameCover } from "@/components/game-cover";
 import { HeartRating } from "@/components/heart-rating";
 import { LikeButton } from "@/components/like-button";
+import { RepliesLink } from "@/components/replies-link";
 import { formatDate, releaseYear } from "@/lib/format";
 import type { PlayerReview } from "@/lib/types";
 
@@ -41,14 +42,17 @@ export function PlayerReviewList({ reviews, signedIn, path }: PlayerReviewListPr
                 <time dateTime={review.createdAt}>{formatDate(review.createdAt)}</time>
               </div>
               <p className="max-w-3xl text-[15px] leading-relaxed text-pretty">{review.body}</p>
-              <LikeButton
-                kind="review"
-                targetId={review.id}
-                likes={review.likes}
-                liked={review.likedByViewer}
-                signedIn={signedIn}
-                path={path}
-              />
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                <LikeButton
+                  kind="review"
+                  targetId={review.id}
+                  likes={review.likes}
+                  liked={review.likedByViewer}
+                  signedIn={signedIn}
+                  path={path}
+                />
+                <RepliesLink reviewId={review.id} replies={review.replies} />
+              </div>
             </div>
           </li>
         );

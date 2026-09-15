@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HeartRating } from "@/components/heart-rating";
 import { LikeButton } from "@/components/like-button";
+import { RepliesLink } from "@/components/replies-link";
 import type { Review } from "@/lib/types";
 
 const rankColors = ["text-accent", "text-p2", "text-p1"];
@@ -74,7 +75,10 @@ export function ReviewTable({ reviews, signedIn, path }: ReviewTableProps) {
                 <span className="md:pt-1">
                   {review.rating !== null && <HeartRating value={review.rating} />}
                 </span>
-                <p className="basis-full text-[15px] leading-relaxed text-pretty">{review.body}</p>
+                <div className="flex basis-full flex-col gap-2">
+                  <p className="text-[15px] leading-relaxed text-pretty">{review.body}</p>
+                  <RepliesLink reviewId={review.id} replies={review.replies} />
+                </div>
               </li>
             );
           })}
