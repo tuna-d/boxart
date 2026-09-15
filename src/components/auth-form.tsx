@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { signIn, signInWithGoogle, signUp, type AuthState } from "@/app/auth/actions";
 import { TextField } from "@/components/text-field";
@@ -17,6 +17,9 @@ const modes = {
 export function AuthForm({ mode }: AuthFormProps) {
   const settings = modes[mode];
   const [state, formAction, pending] = useActionState<AuthState, FormData>(settings.action, null);
+  // One choice covers both forms, so Google sign-ins follow the checkbox too.
+  const [remember, setRemember] = useState(true);
+  const rememberInput = mode === "sign-in" && <input type="hidden" name="remember" value={remember ? "1" : "0"} />;
 
   if (state?.message) {
     return (
@@ -29,6 +32,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   return (
     <div className="flex flex-col gap-6">
       <form action={signInWithGoogle}>
+        {rememberInput}
         <GoogleButton />
       </form>
 
@@ -39,6 +43,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       </div>
 
       <form action={formAction} className="flex flex-col gap-5">
+        {rememberInput}
         {mode === "sign-up" && (
           <TextField
             id="username"
@@ -72,6 +77,30 @@ export function AuthForm({ mode }: AuthFormProps) {
           minLength={mode === "sign-up" ? 8 : undefined}
           hint={mode === "sign-up" ? "At least 8 characters." : undefined}
         />
+
+        {mode === "sign-in" && (
+          <label className="flex w-fit cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(event) => setRemember(event.target.checked)}
+              className="peer sr-only"
+            />
+            <span
+              aria-hidden="true"
+              className="font-pixel whitespace-pre text-accent peer-checked:hidden peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent"
+            >
+              [ ]
+            </span>
+            <span
+              aria-hidden="true"
+              className="hidden font-pixel text-accent peer-checked:inline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent"
+            >
+              [x]
+            </span>
+            <span className="text-sm text-ink-soft">Keep me signed in</span>
+          </label>
+        )}
 
         {state?.error && (
           <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
