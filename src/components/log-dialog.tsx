@@ -3,7 +3,9 @@
 import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { removeLogEntry, saveLogEntry, type LogState } from "@/app/games/actions";
 import { HeartRatingInput } from "@/components/heart-rating-input";
+import { PixelCheckbox } from "@/components/pixel-checkbox";
 import { TextField } from "@/components/text-field";
+import { DIARY_FIRST_DAY, DIARY_NOTE_LIMIT, localToday } from "@/lib/calendar";
 import type { Game, LibraryEntry, LibraryStatus } from "@/lib/types";
 
 export const logStatuses: { value: LibraryStatus; label: string }[] = [
@@ -28,6 +30,11 @@ export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProp
   const [status, setStatus] = useState(initialStatus);
   const [rating, setRating] = useState(entry?.rating ?? 0);
   const [review, setReview] = useState(entry?.review ?? "");
+  // New plays go in the diary by default. Editing a game already marked played or playing
+  // starts unticked, so fixing a typo in a review does not log another play.
+  const [addToDiary, setAddToDiary] = useState(!entry || entry.status === "backlog");
+  // The dialog only renders after a click, so reading the browser's clock here is safe.
+  const [today] = useState(() => localToday());
   const [saveState, saveAction, saving] = useActionState<LogState, FormData>(saveLogEntry, null);
   const [removeState, removeAction, removing] = useActionState<LogState, FormData>(removeLogEntry, null);
   const id = useId();
@@ -162,6 +169,45 @@ export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProp
                 className={`resize-y py-2 leading-relaxed ${fieldClass}`}
               />
             </div>
+
+            <fieldset className="flex flex-col gap-4 border-t-2 border-dashed border-line pt-5">
+              <legend className="sr-only">Diary</legend>
+              <PixelCheckbox
+                name="diary"
+                checked={addToDiary}
+                onChange={setAddToDiary}
+                label="Add to diary"
+                hint="Log the day you played it."
+              />
+              {addToDiary && (
+                <>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <TextField
+                      id={`${id}-played-on`}
+                      name="playedOn"
+                      type="date"
+                      required
+                      min={DIARY_FIRST_DAY}
+                      max={today}
+                      defaultValue={today}
+                      label="Played on"
+                      className="[color-scheme:dark]"
+                    />
+                    <div className="flex items-end pb-3">
+                      <PixelCheckbox name="replay" defaultChecked={false} label="I've played this before" />
+                    </div>
+                  </div>
+                  <TextField
+                    id={`${id}-diary-note`}
+                    name="diaryNote"
+                    maxLength={DIARY_NOTE_LIMIT}
+                    label="Diary note"
+                    hint={`Optional, up to ${DIARY_NOTE_LIMIT} characters.`}
+                    placeholder="Beat the final boss at 2am"
+                  />
+                </>
+              )}
+            </fieldset>
           </>
         )}
 

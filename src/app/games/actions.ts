@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentPlayer } from "@/lib/auth";
+import { DIARY_FIRST_DAY, DIARY_NOTE_LIMIT, isoDay, isValidDay } from "@/lib/calendar";
 import { getGameBySlug } from "@/lib/games";
 import { createClient } from "@/lib/supabase/server";
 import type { Game, LibraryStatus } from "@/lib/types";
@@ -26,7 +27,10 @@ function isStatus(value: string): value is LibraryStatus {
 
 function refreshPages(game: Pick<Game, "slug">, username: string | null) {
   revalidatePath(`/games/${game.slug}`);
-  if (username) revalidatePath(`/players/${username}`);
+  if (username) {
+    revalidatePath(`/players/${username}`);
+    revalidatePath(`/players/${username}/diary`);
+  }
 }
 
 export async function saveLogEntry(_previous: LogState, formData: FormData): Promise<LogState> {
@@ -62,6 +66,22 @@ export async function saveLogEntry(_previous: LogState, formData: FormData): Pro
     return { error: `Reviews can be up to ${REVIEW_LIMIT} characters.` };
   }
 
+  // Backlog games have not been played, so they never go in the diary.
+  const addToDiary = !isBacklog && formData.get("diary") === "on";
+  const playedOn = readText(formData, "playedOn");
+  const note = readText(formData, "diaryNote");
+  if (addToDiary) {
+    // One day of slack past UTC so players ahead of it can log what they played today.
+    const latestDay = isoDay(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    if (!isValidDay(playedOn) || playedOn < DIARY_FIRST_DAY) {
+      return { error: "Pick the day you played it." };
+    }
+    if (playedOn > latestDay) return { error: "The diary date cannot be in the future." };
+    if (note.length > DIARY_NOTE_LIMIT) {
+      return { error: `Diary notes can be up to ${DIARY_NOTE_LIMIT} characters.` };
+    }
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.from("library_entries").upsert(
     {
@@ -81,6 +101,24 @@ export async function saveLogEntry(_previous: LogState, formData: FormData): Pro
   );
   if (error) {
     return { error: "Could not save to your shelf. Try again in a moment." };
+  }
+
+  if (addToDiary) {
+    const { error: diaryError } = await supabase.from("diary_entries").insert({
+      game_id: Number(game.id),
+      game_slug: game.slug,
+      game_title: game.title,
+      game_cover_url: game.coverUrl,
+      game_release_date: game.releaseDate,
+      played_on: playedOn,
+      replay: formData.get("replay") === "on",
+      rating: rating === 0 ? null : rating,
+      note: note || null,
+    });
+    if (diaryError) {
+      refreshPages(game, player.username);
+      return { error: "Saved to your shelf, but the diary entry could not be added. Try again in a moment." };
+    }
   }
 
   refreshPages(game, player.username);
