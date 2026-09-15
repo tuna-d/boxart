@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AddToList } from "@/components/add-to-list";
+import { FriendsWhoPlayed } from "@/components/friends-who-played";
 import { GameCover } from "@/components/game-cover";
 import { LogControls } from "@/components/log-controls";
 import { ReviewTable } from "@/components/review-table";
@@ -10,6 +11,7 @@ import { getCurrentPlayer } from "@/lib/auth";
 import { getGameBySlug } from "@/lib/games";
 import { getPopularReviews, getRatingStats, getViewerEntry } from "@/lib/library";
 import { getListChoices } from "@/lib/lists";
+import { getFriendsWhoPlayed } from "@/lib/follows";
 
 export async function generateMetadata(props: PageProps<"/games/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
@@ -31,11 +33,12 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
   if (!game) notFound();
 
   const viewer = await getCurrentPlayer();
-  const [stats, reviews, entry, listChoices] = await Promise.all([
+  const [stats, reviews, entry, listChoices, friendPlays] = await Promise.all([
     getRatingStats(game),
     getPopularReviews(game, viewer?.id),
     viewer ? getViewerEntry(game, viewer.id) : null,
     viewer ? getListChoices(viewer.id, game.id) : null,
+    viewer ? getFriendsWhoPlayed(viewer.id, game.id) : [],
   ]);
   const meta = [game.developers.join(", "), releaseYear(game.releaseDate), game.platforms.join(" ")].filter(
     Boolean,
@@ -65,6 +68,7 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
             signedIn={viewer !== null}
           />
           {listChoices && <AddToList slug={game.slug} lists={listChoices} />}
+          <FriendsWhoPlayed plays={friendPlays} gameTitle={game.title} />
         </section>
 
         <div className="md:col-span-2 xl:col-span-1">
