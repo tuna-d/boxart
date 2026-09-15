@@ -79,12 +79,26 @@ export type Review = {
   hoursPlayed: number | null;
   likes: number;
   likedByViewer: boolean;
+  replies: number;
   createdAt: string;
 };
 
 export type PlayerReview = {
   game: GameSummary;
   review: Review;
+};
+
+/** A single review with its author's id, for the review page. */
+export type ReviewDetail = {
+  game: GameSummary;
+  review: Review & { author: PlayerLink };
+};
+
+export type ReviewReply = {
+  id: string;
+  author: PlayerLink;
+  body: string;
+  createdAt: string;
 };
 
 export type PlayerSort = "active" | "liked" | "newest";
@@ -166,15 +180,24 @@ export type ListActivity = {
 
 export type ActivityItem = ShelfActivity | ListActivity;
 
-export type NotificationItem = {
+type NotificationBase = {
   id: string;
-  kind: "follow";
   actor: PlayerLink;
   createdAt: string;
   read: boolean;
-  /** Whether the viewer already follows the player behind the notification. */
-  followingBack: boolean;
 };
+
+export type NotificationItem =
+  | (NotificationBase & {
+      kind: "follow";
+      /** Whether the viewer already follows the player behind the notification. */
+      followingBack: boolean;
+    })
+  | (NotificationBase & {
+      kind: "reply";
+      /** The viewer's review that got the reply. */
+      review: { id: string; gameTitle: string };
+    });
 
 export type DiaryEntry = {
   id: string;

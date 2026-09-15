@@ -9,13 +9,14 @@ import type {
   PlayerReview,
   RatingStats,
   Review,
+  ReviewDetail,
   ShelfFilter,
   ShelfSort,
   ShelfStats,
 } from "./types";
 
 const ENTRY_COLUMNS =
-  "id, status, rating, platform, hours_played, review, likes_count, created_at, updated_at, " +
+  "id, status, rating, platform, hours_played, review, likes_count, replies_count, created_at, updated_at, " +
   "game_id, game_slug, game_title, game_cover_url, game_release_date";
 
 type EntryRow = {
@@ -26,6 +27,7 @@ type EntryRow = {
   hours_played: number | null;
   review: string | null;
   likes_count: number;
+  replies_count: number;
   created_at: string;
   updated_at: string;
   game_id: number;
@@ -70,6 +72,7 @@ function toReview(row: EntryRow, likedIds: Set<number>, username?: string): Revi
     hoursPlayed: row.hours_played,
     likes: row.likes_count,
     likedByViewer: likedIds.has(row.id),
+    replies: row.replies_count,
     createdAt: row.created_at,
   };
 }
@@ -245,4 +248,24 @@ export async function getPlayerReviews(
   const rows = data ?? [];
   const liked = await likedEntryIds(rows.map((row) => row.id), viewerId);
   return rows.map((row) => ({ game: toGameSummary(row), review: toReview(row, liked, player.username) }));
+}
+
+/** One review by its shelf entry id, or null when the entry is gone or holds no review. */
+export async function getReview(entryId: number, viewerId?: string): Promise<ReviewDetail | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("library_entries")
+    .select(`${ENTRY_COLUMNS}, author:profiles!library_entries_user_id_fkey (id, username)`)
+    .eq("id", entryId)
+    .not("review", "is", null)
+    .maybeSingle()
+    .overrideTypes<(EntryRow & { author: { id: string; username: string } | null }) | null, { merge: false }>();
+  if (error) throw new Error(`Could not load the review: ${error.message}`);
+  if (!data?.author) return null;
+
+  const liked = await likedEntryIds([data.id], viewerId);
+  return {
+    game: toGameSummary(data),
+    review: { ...toReview(data, liked, data.author.username), author: data.author },
+  };
 }
