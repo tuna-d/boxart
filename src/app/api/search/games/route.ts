@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const items = await quickSearchGames(query);
+    // One retry covers a dropped connection, which would otherwise leave the dropdown empty.
+    const items = await quickSearchGames(query).catch(() => quickSearchGames(query));
     const results: QuickSearchResult[] = items.map(({ game, stats }) => ({
       slug: game.slug,
       title: game.title,
