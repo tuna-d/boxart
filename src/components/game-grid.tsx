@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadMoreGames } from "@/app/games/actions";
-import { GameCard } from "@/components/game-card";
+import { GameList } from "@/components/game-list";
 import type { GameListItem, GameSort } from "@/lib/types";
 
 type GameGridProps = {
@@ -11,11 +11,12 @@ type GameGridProps = {
   genre?: string;
   pageSize: number;
   maxOffset: number;
+  signedIn: boolean;
 };
 
 type Status = "idle" | "loading" | "done" | "error";
 
-export function GameGrid({ initialItems, sort, genre, pageSize, maxOffset }: GameGridProps) {
+export function GameGrid({ initialItems, sort, genre, pageSize, maxOffset, signedIn }: GameGridProps) {
   const [items, setItems] = useState(initialItems);
   const [status, setStatus] = useState<Status>(initialItems.length < pageSize ? "done" : "idle");
   // Counts every row IGDB returned, including repeats, so the next offset stays right.
@@ -57,13 +58,7 @@ export function GameGrid({ initialItems, sort, genre, pageSize, maxOffset }: Gam
         {items.length} {items.length === 1 ? "game" : "games"}
       </p>
 
-      <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-        {items.map((item) => (
-          <li key={item.game.id}>
-            <GameCard {...item} />
-          </li>
-        ))}
-      </ul>
+      <GameList items={items} signedIn={signedIn} />
 
       <div ref={sentinelRef} className="mt-12 flex min-h-12 items-center justify-center" aria-live="polite">
         {status === "loading" && (

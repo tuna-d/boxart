@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GameGrid } from "@/components/game-grid";
 import { TabLink } from "@/components/tab-link";
+import { getCurrentPlayer } from "@/lib/auth";
 import { listGames, listGenres } from "@/lib/games";
 import { GAMES_MAX_OFFSET, GAMES_PAGE_SIZE } from "@/lib/igdb/games";
 import type { GameSort } from "@/lib/types";
@@ -34,7 +35,7 @@ export default async function GamesPage(props: PageProps<"/games">) {
   const genres = await listGenres();
   const activeGenre = genres.find((item) => item.slug === searchParams.genre);
   const genre = activeGenre?.slug;
-  const games = await listGames({ sort, genre });
+  const [games, viewer] = await Promise.all([listGames({ sort, genre }), getCurrentPlayer()]);
 
   return (
     <main className="px-6 pt-10 pb-16 md:px-10">
@@ -82,6 +83,7 @@ export default async function GamesPage(props: PageProps<"/games">) {
         genre={genre}
         pageSize={GAMES_PAGE_SIZE}
         maxOffset={GAMES_MAX_OFFSET}
+        signedIn={viewer !== null}
       />
     </main>
   );
