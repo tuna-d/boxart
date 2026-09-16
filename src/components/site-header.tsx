@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 import { NotificationBell } from "@/components/notification-bell";
+import { PlayerMenu } from "@/components/player-menu";
 import { getCurrentPlayer } from "@/lib/auth";
 import { getNotifications } from "@/lib/follows";
 
@@ -49,6 +50,9 @@ export async function SiteHeader() {
           {player ? (
             <>
               {notifications && <NotificationBell items={notifications.items} unread={notifications.unread} />}
+              <div className="md:hidden">
+                <PlayerMenu username={player.username} needsUsername={player.needsUsername} />
+              </div>
               <Link
                 href={
                   player.needsUsername || !player.username
@@ -56,11 +60,11 @@ export async function SiteHeader() {
                     : `/players/${encodeURIComponent(player.username)}`
                 }
                 title={player.needsUsername ? "Pick a username" : "Your profile"}
-                className="max-w-[40vw] truncate text-accent hover:text-ink"
+                className="hidden max-w-60 truncate text-accent hover:text-ink md:block"
               >
                 {player.needsUsername ? "Enter name" : (player.username ?? "Player")}
               </Link>
-              <form action={signOut}>
+              <form action={signOut} className="hidden md:block">
                 <button type="submit" className="uppercase text-p2 hover:text-ink">
                   Sign out
                 </button>
