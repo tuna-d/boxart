@@ -6,6 +6,7 @@ import { setShelfStatus } from "@/app/games/actions";
 import { GameCover } from "@/components/game-cover";
 import { LogDialog, logStatuses } from "@/components/log-dialog";
 import { releaseYear } from "@/lib/format";
+import { defaultGamePlatform, type PlatformId } from "@/lib/platforms";
 import type { ViewerGameState } from "@/lib/library";
 import type { GameListItem, LibraryStatus } from "@/lib/types";
 
@@ -20,6 +21,8 @@ const statusBadges: Record<LibraryStatus, string> = {
 
 type QuickLogCardProps = GameListItem & {
   signedIn: boolean;
+  /** The platforms on the player's profile, used to preselect one in the log dialog. */
+  playerPlatforms: readonly PlatformId[];
   /** Undefined while the player's shelf entry is still loading. */
   state: ViewerGameState | undefined;
   onStateChange: (gameId: string, state: ViewerGameState) => void;
@@ -27,7 +30,15 @@ type QuickLogCardProps = GameListItem & {
 };
 
 /** A game card with shelf buttons over the cover: on hover, from the corner button or with a long press. */
-export function QuickLogCard({ game, stats, signedIn, state, onStateChange, onDialogClose }: QuickLogCardProps) {
+export function QuickLogCard({
+  game,
+  stats,
+  signedIn,
+  playerPlatforms,
+  state,
+  onStateChange,
+  onDialogClose,
+}: QuickLogCardProps) {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -212,6 +223,7 @@ export function QuickLogCard({ game, stats, signedIn, state, onStateChange, onDi
           entry={entry?.id ? entry : null}
           initialStatus={entry?.status ?? "played"}
           diaryCount={state?.diaryCount ?? 0}
+          defaultPlatform={defaultGamePlatform(game.platforms, playerPlatforms)}
           onClose={() => {
             setDialogOpen(false);
             onDialogClose(game.id);

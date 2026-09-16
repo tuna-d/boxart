@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadMoreGames } from "@/app/games/actions";
 import { GameList } from "@/components/game-list";
+import type { PlatformId } from "@/lib/platforms";
 import type { GameListItem, GameSort } from "@/lib/types";
 
 type GameGridProps = {
@@ -12,11 +13,12 @@ type GameGridProps = {
   pageSize: number;
   maxOffset: number;
   signedIn: boolean;
+  playerPlatforms?: PlatformId[];
 };
 
 type Status = "idle" | "loading" | "done" | "error";
 
-export function GameGrid({ initialItems, sort, genre, pageSize, maxOffset, signedIn }: GameGridProps) {
+export function GameGrid({ initialItems, sort, genre, pageSize, maxOffset, signedIn, playerPlatforms }: GameGridProps) {
   const [items, setItems] = useState(initialItems);
   const [status, setStatus] = useState<Status>(initialItems.length < pageSize ? "done" : "idle");
   // Counts every row IGDB returned, including repeats, so the next offset stays right.
@@ -58,7 +60,7 @@ export function GameGrid({ initialItems, sort, genre, pageSize, maxOffset, signe
         {items.length} {items.length === 1 ? "game" : "games"}
       </p>
 
-      <GameList items={items} signedIn={signedIn} />
+      <GameList items={items} signedIn={signedIn} playerPlatforms={playerPlatforms} />
 
       <div ref={sentinelRef} className="mt-12 flex min-h-12 items-center justify-center" aria-live="polite">
         {status === "loading" && (

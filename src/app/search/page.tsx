@@ -54,7 +54,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
       )}
 
       {results.length > 0 && (
-        <GameList items={results} signedIn={viewer !== null} />
+        <GameList items={results} signedIn={viewer !== null} playerPlatforms={viewer?.platforms} />
       )}
     </main>
   );

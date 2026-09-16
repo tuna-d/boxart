@@ -84,6 +84,7 @@ export default async function GamesPage(props: PageProps<"/games">) {
         pageSize={GAMES_PAGE_SIZE}
         maxOffset={GAMES_MAX_OFFSET}
         signedIn={viewer !== null}
+        playerPlatforms={viewer?.platforms}
       />
     </main>
   );
