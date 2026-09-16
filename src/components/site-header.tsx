@@ -18,7 +18,7 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b-4 border-accent">
-      <div className="flex h-19 items-center gap-4 px-6 md:gap-9 md:px-10">
+      <div className="relative flex h-19 items-center gap-4 px-6 md:gap-9 md:px-10">
         <Link
           href="/"
           className="font-pixel text-2xl leading-none font-bold tracking-wide text-accent md:text-[34px]"
