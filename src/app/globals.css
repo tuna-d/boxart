@@ -21,6 +21,8 @@
 @layer base {
   body {
     @apply bg-screen font-mono text-ink antialiased;
+    /* A last guard against sideways scrolling on phones. clip keeps sticky elements working, unlike hidden. */
+    overflow-x: clip;
   }
 
   body::before {

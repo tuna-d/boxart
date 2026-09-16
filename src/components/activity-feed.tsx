@@ -27,7 +27,7 @@ export function ActivityFeed({ items, quotes = true }: { items: ActivityItem[]; 
               <PlayerAvatar username={item.player.username} />
             </Link>
             <div className="flex min-w-0 flex-col gap-1.5">
-              <p className="text-sm leading-snug">
+              <p className="text-sm leading-snug [overflow-wrap:anywhere]">
                 <Link href={playerHref} className="font-pixel break-all hover:text-accent">
                   {item.player.username}
                 </Link>{" "}

@@ -17,7 +17,7 @@ export default async function Home() {
     <main className="px-6 py-20 md:px-10 md:py-28">
       <div
         className={
-          signedIn ? "grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-16" : undefined
+          signedIn ? "grid grid-cols-[minmax(0,1fr)] items-start gap-12 lg:grid-cols-[minmax(0,1fr)_380px] xl:gap-16" : undefined
         }
       >
         <div className="flex max-w-3xl flex-col gap-6">
