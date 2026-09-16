@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FollowButton } from "@/components/follow-button";
 import { ListCard } from "@/components/list-card";
+import { PlatformBadges } from "@/components/platform-badges";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerReviewList } from "@/components/player-review-list";
 import { ScorePanel } from "@/components/score-panel";
@@ -105,6 +106,7 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
             {player.username}
           </h1>
           {player.bio && <p className="max-w-xl whitespace-pre-line text-ink-soft">{player.bio}</p>}
+          <PlatformBadges platforms={player.platforms} />
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs uppercase">
             <Link href={`${profileHref}/followers`} className="text-ink-soft hover:text-accent">
               <span className="font-pixel text-sm text-accent">{followCounts.followers}</span>{" "}
