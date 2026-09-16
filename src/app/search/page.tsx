@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { GameCard } from "@/components/game-card";
+import { GameList } from "@/components/game-list";
 import { LiveQueryInput } from "@/components/live-query-input";
+import { getCurrentPlayer } from "@/lib/auth";
 import { searchGames } from "@/lib/games";
 
 export async function generateMetadata(props: PageProps<"/search">): Promise<Metadata> {
@@ -12,7 +13,7 @@ export async function generateMetadata(props: PageProps<"/search">): Promise<Met
 export default async function SearchPage(props: PageProps<"/search">) {
   const { q } = await props.searchParams;
   const term = typeof q === "string" ? q.trim() : "";
-  const results = term ? await searchGames(term) : [];
+  const [results, viewer] = await Promise.all([term ? searchGames(term) : [], getCurrentPlayer()]);
 
   return (
     <main className="px-6 pt-10 pb-16 md:px-10">
@@ -53,13 +54,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
       )}
 
       {results.length > 0 && (
-        <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-          {results.map((item) => (
-            <li key={item.game.id}>
-              <GameCard {...item} />
-            </li>
-          ))}
-        </ul>
+        <GameList items={results} signedIn={viewer !== null} />
       )}
     </main>
   );

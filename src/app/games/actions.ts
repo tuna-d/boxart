@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { getCurrentPlayer } from "@/lib/auth";
 import { DIARY_FIRST_DAY, DIARY_NOTE_LIMIT, isoDay, isValidDay } from "@/lib/calendar";
 import { getGameBySlug, listGames } from "@/lib/games";
+import { getViewerEntry, getViewerGameStates, type ViewerGameState } from "@/lib/library";
 import { createClient } from "@/lib/supabase/server";
-import type { Game, GameListItem, GameSort, LibraryStatus } from "@/lib/types";
+import type { Game, GameListItem, GameSort, LibraryEntry, LibraryStatus } from "@/lib/types";
 
 export type LogState = {
   error?: string;
@@ -173,4 +174,52 @@ export async function loadMoreGames({
 }): Promise<GameListItem[]> {
   if (!GAME_SORTS.includes(sort) || !Number.isInteger(offset) || offset < 0) return [];
   return listGames({ sort, genre, offset });
+}
+
+/** Game ids a single grid page can ask about at once. */
+const STATE_BATCH_LIMIT = 72;
+
+/** The signed-in player's shelf entries and diary counts for games on screen. Null when signed out. */
+export async function loadMyGameStates(gameIds: string[]): Promise<Record<string, ViewerGameState> | null> {
+  const player = await getCurrentPlayer();
+  if (!player || !Array.isArray(gameIds)) return null;
+  return getViewerGameStates(player.id, gameIds.slice(0, STATE_BATCH_LIMIT).map(String));
+}
+
+export type QuickLogResult = { entry: LibraryEntry } | { error: string };
+
+/**
+ * Puts a game on a shelf straight from a cover. An existing entry only changes its status,
+ * so its rating, review and diary stay as they are.
+ */
+export async function setShelfStatus(slug: string, status: LibraryStatus): Promise<QuickLogResult> {
+  const player = await getCurrentPlayer();
+  if (!player) return { error: "Sign in to save games to your shelf." };
+  if (!isStatus(status)) return { error: "Choose played, playing or backlog." };
+
+  const game = await getGameBySlug(String(slug));
+  if (!game) return { error: "That game could not be found." };
+
+  const supabase = await createClient();
+  const existing = await getViewerEntry(game, player.id);
+  const { error } = existing
+    ? await supabase
+        .from("library_entries")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("user_id", player.id)
+        .eq("game_id", Number(game.id))
+    : await supabase.from("library_entries").insert({
+        game_id: Number(game.id),
+        game_slug: game.slug,
+        game_title: game.title,
+        game_cover_url: game.coverUrl,
+        game_release_date: game.releaseDate,
+        status,
+      });
+  if (error) return { error: "Could not save to your shelf. Try again in a moment." };
+
+  const entry = await getViewerEntry(game, player.id);
+  if (!entry) return { error: "Could not save to your shelf. Try again in a moment." };
+  refreshPages(game, player.username);
+  return { entry };
 }
