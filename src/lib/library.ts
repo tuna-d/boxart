@@ -269,3 +269,45 @@ export async function getReview(entryId: number, viewerId?: string): Promise<Rev
     review: { ...toReview(data, liked, data.author.username), author: data.author },
   };
 }
+
+export type ViewerGameState = {
+  entry: LibraryEntry | null;
+  diaryCount: number;
+};
+
+/** The viewer's shelf entry and diary count for each of a set of games, keyed by game id. */
+export async function getViewerGameStates(
+  viewerId: string,
+  gameIds: string[],
+): Promise<Record<string, ViewerGameState>> {
+  const ids = [...new Set(gameIds)].map(Number).filter(Number.isInteger);
+  if (ids.length === 0) return {};
+
+  const supabase = await createClient();
+  const [entries, diary] = await Promise.all([
+    supabase
+      .from("library_entries")
+      .select(ENTRY_COLUMNS)
+      .eq("user_id", viewerId)
+      .in("game_id", ids)
+      .overrideTypes<EntryRow[], { merge: false }>(),
+    supabase
+      .from("diary_entries")
+      .select("game_id")
+      .eq("user_id", viewerId)
+      .in("game_id", ids)
+      .overrideTypes<{ game_id: number }[], { merge: false }>(),
+  ]);
+  if (entries.error) throw new Error(`Could not load your shelf entries: ${entries.error.message}`);
+  if (diary.error) throw new Error(`Could not load your diary: ${diary.error.message}`);
+
+  const states: Record<string, ViewerGameState> = {};
+  for (const row of entries.data ?? []) {
+    states[String(row.game_id)] = { entry: toEntry(row), diaryCount: 0 };
+  }
+  for (const row of diary.data ?? []) {
+    const state = (states[String(row.game_id)] ??= { entry: null, diaryCount: 0 });
+    state.diaryCount += 1;
+  }
+  return states;
+}
