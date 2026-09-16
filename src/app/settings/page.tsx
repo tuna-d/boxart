@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BioForm } from "@/components/bio-form";
+import { PlatformsForm } from "@/components/platforms-form";
 import { UsernameForm } from "@/components/username-form";
 import { getCurrentPlayer } from "@/lib/auth";
 import { getPlayer } from "@/lib/players";
@@ -72,6 +73,21 @@ export default async function SettingsPage() {
           <p className="text-sm text-ink-soft">A few lines shown under your name on your profile.</p>
         </div>
         <BioForm currentBio={profile?.bio ?? ""} />
+      </section>
+
+      <section
+        aria-labelledby="platforms-heading"
+        className="flex flex-col gap-4 border-t-2 border-dashed border-line pt-8"
+      >
+        <div className="flex flex-col gap-2">
+          <h2 id="platforms-heading" className="font-pixel text-xl">
+            Platforms
+          </h2>
+          <p className="text-sm text-ink-soft">
+            Where you play. They show as badges on your profile and are picked first when you log a game.
+          </p>
+        </div>
+        <PlatformsForm current={player.platforms} labelledBy="platforms-heading" />
       </section>
     </main>
   );

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentPlayer } from "@/lib/auth";
+import { cleanPlatforms, type PlatformId } from "@/lib/platforms";
 import { createClient } from "@/lib/supabase/server";
 
 export type UsernameState = {
@@ -20,6 +21,8 @@ export async function updateUsername(_previous: UsernameState, formData: FormDat
   const value = formData.get("username");
   const username = typeof value === "string" ? value.trim() : "";
   const wasNew = player.needsUsername;
+  // New players can pick platforms on the same step. Settings saves them with their own form.
+  const platforms = wasNew ? cleanPlatforms(formData.getAll("platforms")) : null;
 
   if (!USERNAME_PATTERN.test(username)) {
     return { username, error: "Usernames are 3-20 letters, numbers, dots or underscores." };
@@ -42,7 +45,10 @@ export async function updateUsername(_previous: UsernameState, formData: FormDat
     }
   }
 
-  const { error } = await supabase.from("profiles").update({ username }).eq("id", player.id);
+  const { error } = await supabase
+    .from("profiles")
+    .update(platforms ? { username, platforms } : { username })
+    .eq("id", player.id);
   if (error) {
     // Unique violation: someone took the name between the check and the update.
     if (error.code === "23505") {
@@ -84,4 +90,26 @@ export async function updateBio(_previous: BioState, formData: FormData): Promis
   if (player.username) revalidatePath(`/players/${player.username}`);
   revalidatePath("/players");
   return { bio, saved: true };
+}
+
+export type PlatformsState = {
+  error?: string;
+  saved?: boolean;
+  platforms?: PlatformId[];
+} | null;
+
+export async function updatePlatforms(_previous: PlatformsState, formData: FormData): Promise<PlatformsState> {
+  const player = await getCurrentPlayer();
+  if (!player) redirect("/sign-in");
+
+  const platforms = cleanPlatforms(formData.getAll("platforms"));
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ platforms }).eq("id", player.id);
+  if (error) {
+    return { platforms, error: "Could not save your platforms. Try again in a moment." };
+  }
+
+  if (player.username) revalidatePath(`/players/${player.username}`);
+  revalidatePath("/games", "layout");
+  return { platforms, saved: true };
 }

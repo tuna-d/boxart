@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateUsername, type UsernameState } from "@/app/settings/actions";
+import { PlatformPicker } from "@/components/platform-picker";
 import { TextField } from "@/components/text-field";
 
 type UsernameFormProps = {
@@ -27,6 +28,18 @@ export function UsernameForm({ currentUsername, isNew }: UsernameFormProps) {
         placeholder={isNew ? currentUsername : undefined}
         hint="3-20 characters: letters, numbers, dots and underscores."
       />
+
+      {isNew && (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <span id="new-platforms" className="font-pixel text-sm text-ink-soft">
+              Where do you play?
+            </span>
+            <span className="text-xs text-muted">Optional. Pick any, they show on your profile.</span>
+          </div>
+          <PlatformPicker selected={[]} labelledBy="new-platforms" />
+        </div>
+      )}
 
       {state?.error && (
         <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
