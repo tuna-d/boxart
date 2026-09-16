@@ -166,7 +166,8 @@ export function QuickLogCard({
             aria-label={`Quick log ${game.title}`}
             onClick={() => setOpen(!open)}
             className={`pointer-events-auto absolute top-2 right-2 flex h-8 w-8 items-center justify-center border-2 border-ink bg-screen/90 font-pixel text-lg leading-none hover:border-accent hover:text-accent focus-visible:opacity-100 [@media(hover:none)]:opacity-100 ${
-              open ? "border-accent text-accent opacity-100" : "opacity-0 group-hover:opacity-100"
+              // With a mouse the buttons show on hover, so the corner button is only for touch and keyboards.
+              open ? "border-accent text-accent opacity-100" : "opacity-0 [@media(hover:hover)]:pointer-events-none"
             }`}
           >
             {open ? "x" : "+"}
