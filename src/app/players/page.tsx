@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FollowButton } from "@/components/follow-button";
 import { GameCover } from "@/components/game-cover";
+import { LiveQueryInput } from "@/components/live-query-input";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { TabLink } from "@/components/tab-link";
 import { getCurrentPlayer } from "@/lib/auth";
@@ -83,10 +84,13 @@ export default async function PlayersPage(props: PageProps<"/players">) {
           <label htmlFor="player-search" className="sr-only">
             Username
           </label>
-          <input
+          <LiveQueryInput
             id="player-search"
-            name="q"
-            type="search"
+            path="/players"
+            params={{
+              ...(sort !== "active" ? { sort } : {}),
+              ...(followingOnly ? { following: "1" } : {}),
+            }}
             defaultValue={query}
             placeholder="Find a player"
             maxLength={20}
