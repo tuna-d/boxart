@@ -22,10 +22,11 @@ type LogDialogProps = {
   game: Pick<Game, "slug" | "title" | "platforms">;
   entry: LibraryEntry | null;
   initialStatus: LibraryStatus;
+  diaryCount?: number;
   onClose: () => void;
 };
 
-export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProps) {
+export function LogDialog({ game, entry, initialStatus, diaryCount = 0, onClose }: LogDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [status, setStatus] = useState(initialStatus);
   const [rating, setRating] = useState(entry?.rating ?? 0);
@@ -35,6 +36,8 @@ export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProp
   const [addToDiary, setAddToDiary] = useState(!entry || entry.status === "backlog");
   // The dialog only renders after a click, so reading the browser's clock here is safe.
   const [today] = useState(() => localToday());
+  // With diary entries to think about, removing asks first instead of acting on one click.
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [saveState, saveAction, saving] = useActionState<LogState, FormData>(saveLogEntry, null);
   const [removeState, removeAction, removing] = useActionState<LogState, FormData>(removeLogEntry, null);
   const id = useId();
@@ -217,8 +220,47 @@ export function LogDialog({ game, entry, initialStatus, onClose }: LogDialogProp
           </p>
         )}
 
+        {entry && confirmingRemove && (
+          <div className="flex flex-col gap-4 border-2 border-dashed border-p1 p-4">
+            <p className="font-pixel text-sm text-p1">Remove this game from your shelf?</p>
+            <PixelCheckbox
+              name="deleteDiary"
+              defaultChecked
+              label={`Also delete ${diaryCount === 1 ? "its diary entry" : `its ${diaryCount} diary entries`}`}
+              hint="Untick to keep the days you played it in your diary."
+            />
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmingRemove(false)}
+                className="h-11 px-3 text-sm font-semibold text-ink-soft uppercase hover:text-ink"
+              >
+                Keep it
+              </button>
+              <button
+                type="submit"
+                formAction={removeAction}
+                formNoValidate
+                disabled={busy}
+                className="h-11 border-2 border-p1 px-4 text-sm font-semibold text-p1 uppercase hover:bg-p1 hover:text-screen disabled:opacity-60"
+              >
+                {removing ? "Removing..." : "Remove"}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center justify-end gap-3">
-          {entry && (
+          {entry && diaryCount > 0 && !confirmingRemove && (
+            <button
+              type="button"
+              onClick={() => setConfirmingRemove(true)}
+              className="mr-auto h-12 px-1 text-sm font-semibold text-p1 uppercase hover:text-ink"
+            >
+              Remove from shelf
+            </button>
+          )}
+          {entry && diaryCount === 0 && (
             <button
               type="submit"
               formAction={removeAction}

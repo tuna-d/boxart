@@ -142,6 +142,19 @@ export async function removeLogEntry(_previous: LogState, formData: FormData): P
     return { error: "Could not remove it from your shelf. Try again in a moment." };
   }
 
+  // Diary entries are kept apart from the shelf, so they are only removed when the player asks.
+  if (formData.get("deleteDiary") === "on") {
+    const { error: diaryError } = await supabase
+      .from("diary_entries")
+      .delete()
+      .eq("user_id", player.id)
+      .eq("game_id", Number(game.id));
+    if (diaryError) {
+      refreshPages(game, player.username);
+      return { error: "Removed from your shelf, but the diary entries could not be deleted. Try again in a moment." };
+    }
+  }
+
   refreshPages(game, player.username);
   return { removed: true };
 }

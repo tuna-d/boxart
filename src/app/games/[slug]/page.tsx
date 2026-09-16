@@ -69,6 +69,7 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
             game={{ slug: game.slug, title: game.title, platforms: game.platforms }}
             entry={entry}
             signedIn={viewer !== null}
+            diaryCount={diaryPlays?.count ?? 0}
           />
           {diaryPlays && viewer?.username && (
             <p className="text-sm text-ink-soft">
