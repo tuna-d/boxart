@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GameCard } from "@/components/game-card";
+import { LiveQueryInput } from "@/components/live-query-input";
 import { searchGames } from "@/lib/games";
 
 export async function generateMetadata(props: PageProps<"/search">): Promise<Metadata> {
@@ -26,10 +27,10 @@ export default async function SearchPage(props: PageProps<"/search">) {
         <label htmlFor="search-page-input" className="sr-only">
           Game title
         </label>
-        <input
+        <LiveQueryInput
           id="search-page-input"
-          name="q"
-          type="search"
+          path="/search"
+          delay={450}
           defaultValue={term}
           placeholder="Type a game title"
           autoFocus={!term}

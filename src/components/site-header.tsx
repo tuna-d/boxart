@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
+import { GameSearchBox } from "@/components/game-search-box";
 import { NotificationBell } from "@/components/notification-bell";
 import { PlayerMenu } from "@/components/player-menu";
 import { getCurrentPlayer } from "@/lib/auth";
@@ -33,18 +34,9 @@ export async function SiteHeader() {
           ))}
         </nav>
 
-        <form action="/search" className="ml-auto hidden items-center gap-2 text-sm lg:flex">
-          <label htmlFor="site-search" className="whitespace-nowrap text-muted">
-            SEARCH &gt;
-          </label>
-          <input
-            id="site-search"
-            name="q"
-            type="search"
-            placeholder="_"
-            className="w-44 bg-transparent text-ink placeholder:text-muted"
-          />
-        </form>
+        <div className="ml-auto hidden lg:block">
+          <GameSearchBox />
+        </div>
 
         <div className="ml-auto flex items-center gap-4 font-pixel text-sm whitespace-nowrap uppercase md:gap-6 md:text-[15px] lg:ml-0">
           {player ? (

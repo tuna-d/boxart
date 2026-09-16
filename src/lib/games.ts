@@ -23,3 +23,8 @@ export async function listGenres(): Promise<Genre[]> {
 export async function searchGames(term: string): Promise<GameListItem[]> {
   return withRatingSummaries(await searchIgdbGames(term));
 }
+
+/** The best few matches for the search box dropdown. */
+export async function quickSearchGames(term: string, limit = 5): Promise<GameListItem[]> {
+  return withRatingSummaries((await searchIgdbGames(term)).slice(0, limit));
+}
