@@ -266,9 +266,9 @@ export default async function DiaryPage(props: PageProps<"/players/[username]/di
                         <button
                           type="submit"
                           aria-label={`Delete the ${entry.game.title} entry from ${entry.playedOn}`}
-                          className="flex h-8 min-w-8 items-center justify-center border-2 border-line px-1.5 font-pixel text-xs hover:border-p1 hover:text-p1"
+                          className="flex h-8 items-center justify-center border-2 border-line px-2.5 text-xs font-semibold text-ink-soft uppercase hover:border-p1 hover:text-p1"
                         >
-                          X
+                          Delete
                         </button>
                       </form>
                     )}
