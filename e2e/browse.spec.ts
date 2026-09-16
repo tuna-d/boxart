@@ -42,6 +42,34 @@ test.describe("signed-out visitor", () => {
     await expect(page.locator('main a[href="/games/celeste"]')).toBeVisible();
   });
 
+  test("picks a game from the header search dropdown", async ({ page }) => {
+    await page.goto("/lists");
+    const search = page.getByRole("combobox", { name: "Search >" });
+    await search.fill("celeste");
+
+    const options = page.getByRole("option");
+    await expect(options.first()).toBeVisible({ timeout: 15_000 });
+    expect(await options.count()).toBeLessThanOrEqual(5);
+    await expect(page.getByRole("link", { name: /See all results for "celeste"/i })).toHaveAttribute(
+      "href",
+      "/search?q=celeste",
+    );
+
+    await search.press("ArrowDown");
+    await search.press("Enter");
+    await expect(page).toHaveURL(/\/games\/[a-z0-9-]+$/);
+  });
+
+  test("filters players while typing", async ({ page }) => {
+    await page.goto("/players?sort=newest");
+    const firstName = await page.locator('main li a[href^="/players/"]').first().getAttribute("href");
+    const username = decodeURIComponent(firstName!.replace("/players/", ""));
+
+    await page.getByRole("searchbox", { name: "Username" }).fill(username);
+    await expect(page).toHaveURL(`/players?sort=newest&q=${encodeURIComponent(username)}`);
+    await expect(page.locator(`main li a[href="/players/${encodeURIComponent(username)}"]`).first()).toBeVisible();
+  });
+
   test("opens a player profile from the directory", async ({ page }) => {
     await page.goto("/players");
     const firstPlayer = page.locator('main li a[href^="/players/"]').first();
