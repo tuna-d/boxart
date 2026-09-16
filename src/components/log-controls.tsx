@@ -11,13 +11,15 @@ type LogControlsProps = {
   signedIn: boolean;
   /** How many diary entries the player has for this game. */
   diaryCount?: number;
+  /** Preselected for new logs, from the platforms on the player's profile. */
+  defaultPlatform?: string | null;
 };
 
 const statusClass = "flex h-11 items-center border-2 px-3.5 uppercase hover:border-accent hover:text-accent";
 const startClass =
   "flex h-13 w-fit items-center px-5 font-pixel text-lg key-button";
 
-export function LogControls({ game, entry, signedIn, diaryCount = 0 }: LogControlsProps) {
+export function LogControls({ game, entry, signedIn, diaryCount = 0, defaultPlatform = null }: LogControlsProps) {
   const [dialogStatus, setDialogStatus] = useState<LibraryStatus | null>(null);
 
   if (!signedIn) {
@@ -71,6 +73,7 @@ export function LogControls({ game, entry, signedIn, diaryCount = 0 }: LogContro
           entry={entry}
           initialStatus={dialogStatus}
           diaryCount={diaryCount}
+          defaultPlatform={defaultPlatform}
           onClose={() => setDialogStatus(null)}
         />
       )}

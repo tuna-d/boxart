@@ -23,10 +23,11 @@ type LogDialogProps = {
   entry: LibraryEntry | null;
   initialStatus: LibraryStatus;
   diaryCount?: number;
+  defaultPlatform?: string | null;
   onClose: () => void;
 };
 
-export function LogDialog({ game, entry, initialStatus, diaryCount = 0, onClose }: LogDialogProps) {
+export function LogDialog({ game, entry, initialStatus, diaryCount = 0, defaultPlatform = null, onClose }: LogDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [status, setStatus] = useState(initialStatus);
   const [rating, setRating] = useState(entry?.rating ?? 0);
@@ -130,7 +131,7 @@ export function LogDialog({ game, entry, initialStatus, diaryCount = 0, onClose 
                 <select
                   id={`${id}-platform`}
                   name="platform"
-                  defaultValue={entry?.platform ?? ""}
+                  defaultValue={entry ? (entry.platform ?? "") : (defaultPlatform ?? "")}
                   className={`h-12 ${fieldClass}`}
                 >
                   <option value="">Not set</option>

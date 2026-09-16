@@ -10,6 +10,7 @@ import { ScorePanel } from "@/components/score-panel";
 import { formatDate, releaseYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
 import { getDiaryPlays } from "@/lib/diary";
+import { defaultGamePlatform } from "@/lib/platforms";
 import { getGameBySlug } from "@/lib/games";
 import { getPopularReviews, getRatingStats, getViewerEntry } from "@/lib/library";
 import { getListChoices } from "@/lib/lists";
@@ -70,6 +71,7 @@ export default async function GamePage(props: PageProps<"/games/[slug]">) {
             entry={entry}
             signedIn={viewer !== null}
             diaryCount={diaryPlays?.count ?? 0}
+            defaultPlatform={viewer ? defaultGamePlatform(game.platforms, viewer.platforms) : null}
           />
           {diaryPlays && viewer?.username && (
             <p className="text-sm text-ink-soft">
