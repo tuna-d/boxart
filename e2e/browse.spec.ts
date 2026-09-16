@@ -73,4 +73,13 @@ test.describe("mobile visitor", () => {
     await sections.getByRole("link", { name: "Players" }).click();
     await expect(page).toHaveURL(/\/players$/);
   });
+
+  test("fits the screen without sideways scrolling @mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const path of ["/", "/games", "/lists", "/players", "/search?q=zelda", "/sign-in"]) {
+      await page.goto(path);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, path).toBeLessThanOrEqual(0);
+    }
+  });
 });
