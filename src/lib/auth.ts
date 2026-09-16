@@ -1,10 +1,12 @@
 import { cache } from "react";
+import { cleanPlatforms, type PlatformId } from "@/lib/platforms";
 import { createClient } from "@/lib/supabase/server";
 
 export type CurrentPlayer = {
   id: string;
   username: string | null;
   needsUsername: boolean;
+  platforms: PlatformId[];
 };
 
 // Cached per request so the header and the page share one lookup.
@@ -16,7 +18,7 @@ export const getCurrentPlayer = cache(async (): Promise<CurrentPlayer | null> =>
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, needs_username")
+    .select("username, needs_username, platforms")
     .eq("id", userId)
     .maybeSingle();
 
@@ -24,5 +26,6 @@ export const getCurrentPlayer = cache(async (): Promise<CurrentPlayer | null> =>
     id: userId,
     username: profile?.username ?? null,
     needsUsername: profile?.needs_username ?? false,
+    platforms: cleanPlatforms(profile?.platforms ?? []),
   };
 });

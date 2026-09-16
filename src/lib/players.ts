@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cleanPlatforms } from "./platforms";
 import type { Player, PlayerListItem, PlayerSort } from "./types";
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{3,20}$/;
@@ -11,13 +12,19 @@ export async function getPlayer(username: string): Promise<Player | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, username, bio, created_at")
+    .select("id, username, bio, platforms, created_at")
     .ilike("username", pattern)
     .maybeSingle();
   if (error) throw new Error(`Could not load the player: ${error.message}`);
   if (!data) return null;
 
-  return { id: data.id, username: data.username, bio: data.bio, joinedAt: data.created_at };
+  return {
+    id: data.id,
+    username: data.username,
+    bio: data.bio,
+    platforms: cleanPlatforms(data.platforms ?? []),
+    joinedAt: data.created_at,
+  };
 }
 
 type PlayerRow = {

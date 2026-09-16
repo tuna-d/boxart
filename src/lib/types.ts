@@ -1,3 +1,5 @@
+import type { PlatformId } from "./platforms";
+
 export type Game = {
   id: string;
   slug: string;
@@ -37,6 +39,7 @@ export type Player = {
   id: string;
   username: string;
   bio: string;
+  platforms: PlatformId[];
   joinedAt: string;
 };
 
@@ -104,7 +107,7 @@ export type ReviewReply = {
 export type PlayerSort = "active" | "liked" | "newest";
 
 export type PlayerListItem = {
-  player: Player;
+  player: Omit<Player, "platforms">;
   gamesCount: number;
   reviewsCount: number;
   likesReceived: number;
