@@ -6,6 +6,8 @@ import { AddGameButton } from "@/components/add-game-button";
 import { GameCover } from "@/components/game-cover";
 import { LikeButton } from "@/components/like-button";
 import { PlayerAvatar } from "@/components/player-avatar";
+import { QuickLogFrame } from "@/components/quick-log-frame";
+import { ViewerGameStatesProvider } from "@/components/viewer-game-states";
 import { getCurrentPlayer } from "@/lib/auth";
 import { formatDate, releaseYear } from "@/lib/format";
 import { searchGames } from "@/lib/games";
@@ -155,65 +157,74 @@ export default async function ListPage(props: PageProps<"/lists/[id]">) {
             {isOwner ? "Your list is empty. Search above to add the first game." : "No games on this list yet."}
           </p>
         ) : (
-          <ol className="grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {list.entries.map(({ id: entryId, game }, index) => (
-              <li key={entryId} className="flex flex-col gap-3">
-                <Link href={`/games/${game.slug}`} className="group relative flex flex-col gap-3">
-                  <GameCover
-                    title={game.title}
-                    imageUrl={game.coverUrl}
-                    size="sm"
-                    className="w-full transition-transform group-hover:-translate-y-1"
-                  />
-                  {list.ranked && (
-                    <span className="absolute -top-3 -left-3 flex h-9 min-w-9 items-center justify-center bg-accent px-1.5 font-pixel text-lg text-screen shadow-[3px_3px_0_var(--color-ink)]">
-                      {index + 1}
-                    </span>
-                  )}
-                  <span className="flex flex-col gap-1">
-                    <span className="font-pixel text-sm leading-tight uppercase group-hover:text-accent">
-                      {game.title}
-                    </span>
-                    <span className="text-xs text-muted">{releaseYear(game.releaseDate)}</span>
-                  </span>
-                </Link>
+          <ViewerGameStatesProvider
+            gameIds={list.entries.map(({ game }) => game.id)}
+            signedIn={viewer !== null}
+            playerPlatforms={viewer?.platforms}
+          >
+            <ol className="grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              {list.entries.map(({ id: entryId, game }, index) => (
+                <li key={entryId} className="flex flex-col gap-3">
+                  {/* Ranked numbers sit on the cover's corner, so ranked lists leave out the shelf badge. */}
+                  <QuickLogFrame game={game} showBadge={!list.ranked}>
+                    <Link href={`/games/${game.slug}`} draggable={false} className="group relative flex flex-col gap-3">
+                      <GameCover
+                        title={game.title}
+                        imageUrl={game.coverUrl}
+                        size="sm"
+                        className="w-full transition-transform group-hover:-translate-y-1"
+                      />
+                      {list.ranked && (
+                        <span className="absolute -top-3 -left-3 flex h-9 min-w-9 items-center justify-center bg-accent px-1.5 font-pixel text-lg text-screen shadow-[3px_3px_0_var(--color-ink)]">
+                          {index + 1}
+                        </span>
+                      )}
+                      <span className="flex flex-col gap-1">
+                        <span className="font-pixel text-sm leading-tight uppercase group-hover:text-accent">
+                          {game.title}
+                        </span>
+                        <span className="text-xs text-muted">{releaseYear(game.releaseDate)}</span>
+                      </span>
+                    </Link>
+                  </QuickLogFrame>
 
-                {isOwner && (
-                  <div className="mt-auto flex gap-1.5">
-                    {(["up", "down"] as const).map((direction) => {
-                      const disabled = direction === "up" ? index === 0 : index === list.entries.length - 1;
-                      return (
-                        <form key={direction} action={moveListEntry}>
-                          <input type="hidden" name="listId" value={list.id} />
-                          <input type="hidden" name="entryId" value={entryId} />
-                          <input type="hidden" name="direction" value={direction} />
-                          <button
-                            type="submit"
-                            disabled={disabled}
-                            aria-label={`Move ${game.title} ${direction === "up" ? "earlier" : "later"}`}
-                            className={`${controlClass} enabled:hover:border-accent enabled:hover:text-accent`}
-                          >
-                            {direction === "up" ? "<" : ">"}
-                          </button>
-                        </form>
-                      );
-                    })}
-                    <form action={removeListEntry} className="ml-auto">
-                      <input type="hidden" name="listId" value={list.id} />
-                      <input type="hidden" name="entryId" value={entryId} />
-                      <button
-                        type="submit"
-                        aria-label={`Remove ${game.title} from the list`}
-                        className={`${controlClass} hover:border-p1 hover:text-p1`}
-                      >
-                        X
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ol>
+                  {isOwner && (
+                    <div className="mt-auto flex gap-1.5">
+                      {(["up", "down"] as const).map((direction) => {
+                        const disabled = direction === "up" ? index === 0 : index === list.entries.length - 1;
+                        return (
+                          <form key={direction} action={moveListEntry}>
+                            <input type="hidden" name="listId" value={list.id} />
+                            <input type="hidden" name="entryId" value={entryId} />
+                            <input type="hidden" name="direction" value={direction} />
+                            <button
+                              type="submit"
+                              disabled={disabled}
+                              aria-label={`Move ${game.title} ${direction === "up" ? "earlier" : "later"}`}
+                              className={`${controlClass} enabled:hover:border-accent enabled:hover:text-accent`}
+                            >
+                              {direction === "up" ? "<" : ">"}
+                            </button>
+                          </form>
+                        );
+                      })}
+                      <form action={removeListEntry} className="ml-auto">
+                        <input type="hidden" name="listId" value={list.id} />
+                        <input type="hidden" name="entryId" value={entryId} />
+                        <button
+                          type="submit"
+                          aria-label={`Remove ${game.title} from the list`}
+                          className={`${controlClass} hover:border-p1 hover:text-p1`}
+                        >
+                          X
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </ViewerGameStatesProvider>
         )}
       </section>
     </main>

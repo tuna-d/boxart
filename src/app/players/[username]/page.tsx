@@ -9,6 +9,7 @@ import { PlayerReviewList } from "@/components/player-review-list";
 import { ScorePanel } from "@/components/score-panel";
 import { ShelfCard } from "@/components/shelf-card";
 import { TabLink } from "@/components/tab-link";
+import { ViewerGameStatesProvider } from "@/components/viewer-game-states";
 import { formatMonthYear } from "@/lib/format";
 import { getCurrentPlayer } from "@/lib/auth";
 import { getDiaryCount } from "@/lib/diary";
@@ -193,13 +194,19 @@ export default async function PlayerPage(props: PageProps<"/players/[username]">
               {shelf === "rated" ? "No rated games yet." : "Nothing on this shelf yet."}
             </p>
           ) : (
-            <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-              {shelfPage.items.map((item) => (
-                <li key={item.game.id}>
-                  <ShelfCard {...item} showStatus={shelf === "all" || shelf === "rated"} />
-                </li>
-              ))}
-            </ul>
+            <ViewerGameStatesProvider
+              gameIds={shelfPage.items.map((item) => item.game.id)}
+              signedIn={viewer !== null}
+              playerPlatforms={viewer?.platforms}
+            >
+              <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+                {shelfPage.items.map((item) => (
+                  <li key={item.game.id}>
+                    <ShelfCard {...item} showStatus={shelf === "all" || shelf === "rated"} />
+                  </li>
+                ))}
+              </ul>
+            </ViewerGameStatesProvider>
           )}
 
           {shelfPage.hasMore && shown < MAX_SHOWN && (

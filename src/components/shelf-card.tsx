@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GameCover } from "@/components/game-cover";
 import { HeartRating } from "@/components/heart-rating";
+import { QuickLogFrame } from "@/components/quick-log-frame";
 import type { LibraryItem } from "@/lib/types";
 
 const statusLabels = {
@@ -21,21 +22,24 @@ export function ShelfCard({ game, entry, showStatus = false }: ShelfCardProps) {
     entry.hoursPlayed !== null && `${entry.hoursPlayed}h`,
   ].filter(Boolean);
 
+  // The card shows this player's shelf, so the viewer's own shelf only shows in the quick log buttons.
   return (
-    <Link href={`/games/${game.slug}`} className="group flex flex-col gap-3">
-      <GameCover
-        title={game.title}
-        imageUrl={game.coverUrl}
-        size="sm"
-        className="w-full transition-transform group-hover:-translate-y-1"
-      />
-      <span className="flex flex-col gap-1.5">
-        <span className="line-clamp-2 font-pixel text-[13px] leading-tight uppercase group-hover:text-accent">
-          {game.title}
+    <QuickLogFrame game={game} showBadge={false}>
+      <Link href={`/games/${game.slug}`} draggable={false} className="group flex flex-col gap-3">
+        <GameCover
+          title={game.title}
+          imageUrl={game.coverUrl}
+          size="sm"
+          className="w-full transition-transform group-hover:-translate-y-1"
+        />
+        <span className="flex flex-col gap-1.5">
+          <span className="line-clamp-2 font-pixel text-[13px] leading-tight uppercase group-hover:text-accent">
+            {game.title}
+          </span>
+          {entry.rating !== null && <HeartRating value={entry.rating} size="xs" />}
+          {details.length > 0 && <span className="text-xs text-muted">{details.join(" · ")}</span>}
         </span>
-        {entry.rating !== null && <HeartRating value={entry.rating} size="xs" />}
-        {details.length > 0 && <span className="text-xs text-muted">{details.join(" · ")}</span>}
-      </span>
-    </Link>
+      </Link>
+    </QuickLogFrame>
   );
 }
