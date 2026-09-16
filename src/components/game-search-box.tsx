@@ -55,20 +55,34 @@ export function GameSearchBox() {
   }, [term, key, searchable, answered]);
 
   useEffect(() => {
-    if (!open) return;
+    // A typed term is cleared by a click elsewhere even after the dropdown has closed.
+    if (!open && !query) return;
     function onPointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (rootRef.current?.contains(event.target as Node)) return;
+      setQuery("");
+      setOpen(false);
+      setActive(-1);
     }
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
+  }, [open, query]);
 
   const showPanel = open && searchable;
+
+  // Leaving the search, by Escape, a click elsewhere or picking a result, starts the next one empty.
+  function reset() {
+    setQuery("");
+    setOpen(false);
+    setActive(-1);
+  }
   const optionId = (index: number) => `${id}-option-${index}`;
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Escape") {
-      setOpen(false);
+      // The browser's own Escape only clears a search field, so also close and leave it.
+      event.preventDefault();
+      reset();
+      event.currentTarget.blur();
       return;
     }
     if (!searchable || results.length === 0) return;
@@ -82,7 +96,7 @@ export function GameSearchBox() {
       setActive((index) => (index <= 0 ? results.length - 1 : index - 1));
     } else if (event.key === "Enter" && showPanel && active >= 0) {
       event.preventDefault();
-      setOpen(false);
+      reset();
       router.push(`/games/${results[active].slug}`);
     }
   }
@@ -141,7 +155,7 @@ export function GameSearchBox() {
                     href={`/games/${result.slug}`}
                     tabIndex={-1}
                     onMouseEnter={() => setActive(index)}
-                    onClick={() => setOpen(false)}
+                    onClick={reset}
                     className={`flex items-center gap-3 px-3 py-2.5 ${index === active ? "bg-accent/10 text-accent" : ""}`}
                   >
                     <span className="relative h-14 w-[42px] shrink-0 overflow-hidden bg-shade">
