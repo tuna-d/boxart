@@ -79,3 +79,18 @@ export async function getDiaryPlays(playerId: string, gameId: string): Promise<D
   const latest = data?.[0];
   return latest && count ? { count, lastPlayedOn: latest.played_on } : null;
 }
+
+/** A player's diary entries for one game, latest day first. */
+export async function getGameDiaryEntries(playerId: string, gameSlug: string): Promise<DiaryEntry[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("diary_entries")
+    .select(DIARY_COLUMNS)
+    .eq("user_id", playerId)
+    .eq("game_slug", gameSlug)
+    .order("played_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .overrideTypes<DiaryRow[], { merge: false }>();
+  if (error) throw new Error(`Could not load your diary entries: ${error.message}`);
+  return (data ?? []).map(toDiaryEntry);
+}

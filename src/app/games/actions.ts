@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentPlayer } from "@/lib/auth";
 import { DIARY_FIRST_DAY, DIARY_NOTE_LIMIT, isoDay, isValidDay } from "@/lib/calendar";
+import { getGameDiaryEntries } from "@/lib/diary";
 import { getGameBySlug, listGames } from "@/lib/games";
+import { parseId } from "@/lib/ids";
 import { getViewerEntry, getViewerGameStates, type ViewerGameState } from "@/lib/library";
 import { createClient } from "@/lib/supabase/server";
-import type { Game, GameListItem, GameSort, LibraryEntry, LibraryStatus } from "@/lib/types";
+import type { DiaryEntry, Game, GameListItem, GameSort, LibraryEntry, LibraryStatus } from "@/lib/types";
 
 export type LogState = {
   error?: string;
@@ -222,4 +224,34 @@ export async function setShelfStatus(slug: string, status: LibraryStatus): Promi
   if (!entry) return { error: "Could not save to your shelf. Try again in a moment." };
   refreshPages(game, player.username);
   return { entry };
+}
+
+const SLUG_PATTERN = /^[a-z0-9-]+$/;
+
+/** The details the log dialog needs, for covers that only carry a game's title and cover. */
+export async function loadLogGame(slug: string): Promise<Pick<Game, "slug" | "title" | "platforms"> | null> {
+  const game = await getGameBySlug(String(slug));
+  return game ? { slug: game.slug, title: game.title, platforms: game.platforms } : null;
+}
+
+/** The signed-in player's diary entries for one game, for the log dialog. Null when signed out. */
+export async function loadMyDiaryForGame(slug: string): Promise<DiaryEntry[] | null> {
+  const player = await getCurrentPlayer();
+  if (!player || typeof slug !== "string" || !SLUG_PATTERN.test(slug)) return null;
+  return getGameDiaryEntries(player.id, slug);
+}
+
+export async function removeDiaryEntry(entryId: string, slug: string): Promise<{ removed: true } | { error: string }> {
+  const player = await getCurrentPlayer();
+  if (!player) return { error: "Sign in to change your diary." };
+  const id = parseId(entryId);
+  if (!id) return { error: "That diary entry could not be found." };
+
+  // Row level security also keeps players to their own diary.
+  const supabase = await createClient();
+  const { error } = await supabase.from("diary_entries").delete().eq("id", id).eq("user_id", player.id);
+  if (error) return { error: "Could not delete the diary entry. Try again in a moment." };
+
+  if (typeof slug === "string" && SLUG_PATTERN.test(slug)) refreshPages({ slug }, player.username);
+  return { removed: true };
 }
