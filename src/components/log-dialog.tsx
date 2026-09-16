@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { removeLogEntry, saveLogEntry, type LogState } from "@/app/games/actions";
+import { GameDiaryEntries } from "@/components/game-diary-entries";
 import { HeartRatingInput } from "@/components/heart-rating-input";
 import { PixelCheckbox } from "@/components/pixel-checkbox";
 import { TextField } from "@/components/text-field";
@@ -39,6 +40,8 @@ export function LogDialog({ game, entry, initialStatus, diaryCount = 0, defaultP
   const [today] = useState(() => localToday());
   // With diary entries to think about, removing asks first instead of acting on one click.
   const [confirmingRemove, setConfirmingRemove] = useState(false);
+  // Deleting diary days in the dialog lowers this, so removing the game stops asking about them.
+  const [liveDiaryCount, setLiveDiaryCount] = useState(diaryCount);
   const [saveState, saveAction, saving] = useActionState<LogState, FormData>(saveLogEntry, null);
   const [removeState, removeAction, removing] = useActionState<LogState, FormData>(removeLogEntry, null);
   const id = useId();
@@ -215,19 +218,21 @@ export function LogDialog({ game, entry, initialStatus, diaryCount = 0, defaultP
           </>
         )}
 
+        {diaryCount > 0 && <GameDiaryEntries slug={game.slug} onCountChange={setLiveDiaryCount} />}
+
         {error && (
           <p role="alert" className="border-2 border-dashed border-p1 p-3 text-sm text-p1">
             {error}
           </p>
         )}
 
-        {entry && confirmingRemove && (
+        {entry && confirmingRemove && liveDiaryCount > 0 && (
           <div className="flex flex-col gap-4 border-2 border-dashed border-p1 p-4">
             <p className="font-pixel text-sm text-p1">Remove this game from your shelf?</p>
             <PixelCheckbox
               name="deleteDiary"
               defaultChecked
-              label={`Also delete ${diaryCount === 1 ? "its diary entry" : `its ${diaryCount} diary entries`}`}
+              label={`Also delete ${liveDiaryCount === 1 ? "its diary entry" : `its ${liveDiaryCount} diary entries`}`}
               hint="Untick to keep the days you played it in your diary."
             />
             <div className="flex flex-wrap items-center justify-end gap-3">
@@ -252,7 +257,7 @@ export function LogDialog({ game, entry, initialStatus, diaryCount = 0, defaultP
         )}
 
         <div className="flex flex-wrap items-center justify-end gap-3">
-          {entry && diaryCount > 0 && !confirmingRemove && (
+          {entry && liveDiaryCount > 0 && !confirmingRemove && (
             <button
               type="button"
               onClick={() => setConfirmingRemove(true)}
@@ -261,7 +266,7 @@ export function LogDialog({ game, entry, initialStatus, diaryCount = 0, defaultP
               Remove from shelf
             </button>
           )}
-          {entry && diaryCount === 0 && (
+          {entry && liveDiaryCount === 0 && (
             <button
               type="submit"
               formAction={removeAction}
