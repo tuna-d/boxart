@@ -92,7 +92,7 @@ export async function signUp(_previous: AuthState, formData: FormData): Promise<
     return { ...values, error: "That username is taken." };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -109,6 +109,15 @@ export async function signUp(_previous: AuthState, formData: FormData): Promise<
       return { ...values, error: "Too many sign-ups right now. Try again in a few minutes." };
     }
     return { ...values, error: "Could not create your account. Try again in a moment." };
+  }
+
+  // Signing up with an email that already has an account looks like a success but sends no
+  // mail, and comes back without identities. Say so instead of leaving players waiting.
+  if (signUpData.user && signUpData.user.identities?.length === 0) {
+    return {
+      ...values,
+      error: "That email already has an account. Sign in instead, or use the Google button if you joined with Google.",
+    };
   }
 
   return { message: `Almost there. Open the link we sent to ${email} to start playing.` };
@@ -131,4 +140,26 @@ export async function signOut() {
   await supabase.auth.signOut();
   (await cookies()).delete(REMEMBER_COOKIE);
   redirect("/");
+}
+
+/** Sends the confirmation email again, for players whose link expired or never arrived. */
+export async function resendConfirmation(_previous: AuthState, formData: FormData): Promise<AuthState> {
+  const email = readText(formData, "email");
+  if (!email) return { error: "Enter the email you joined with." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${await siteOrigin()}/auth/confirm` },
+  });
+
+  if (error) {
+    if (error.code === "over_email_send_rate_limit") {
+      return { email, error: "Too many emails have gone out in the last hour. Try again later." };
+    }
+    return { email, error: "Could not send the email. Try again in a moment." };
+  }
+
+  return { message: `Sent. Open the new link in ${email} in this browser.` };
 }
