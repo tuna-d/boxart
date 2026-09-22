@@ -120,6 +120,9 @@ export async function signUp(_previous: AuthState, formData: FormData): Promise<
     };
   }
 
+  // With email confirmation off, sign-ups come back signed in and can start playing.
+  if (signUpData.session) redirect("/");
+
   return { message: `Almost there. Open the link we sent to ${email} to start playing.` };
 }
 
